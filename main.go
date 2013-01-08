@@ -1,0 +1,5 @@
+package gob
+
+func main() {
+
+}
