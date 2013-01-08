@@ -1,4 +1,4 @@
-package gob
+package main
 
 func main() {
 
