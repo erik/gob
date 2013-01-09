@@ -28,6 +28,15 @@ type Token struct {
 	start, end scanner.Position
 }
 
+func (t *Token) Error() Token {
+	return Token{
+		kind:  tkError,
+		value: t.String(),
+		start: t.start,
+		end:   t.end,
+	}
+}
+
 func (t TokenType) String() string {
 	switch t {
 	case tkError:

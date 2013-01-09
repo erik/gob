@@ -9,16 +9,26 @@ import (
 
 const eof int = -1
 
-type Position scanner.Position
-
 type Lexer struct {
 	name      string
 	scanner   scanner.Scanner
 	lookahead *list.List
 }
 
-const whitespace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
-const noWhitespace = 0
+type LexError struct {
+	pos scanner.Position
+	msg string
+}
+
+func (l *LexError) Error() string {
+	return fmt.Sprintf("Lex error on line: %d, character: %d: %s",
+		l.pos.Line, l.pos.Column, l.msg)
+
+}
+
+func NewLexError(pos scanner.Position, msg string) error {
+	return &LexError{pos, msg}
+}
 
 func NewLexer(name string, input io.Reader) *Lexer {
 	lex := &Lexer{
@@ -27,31 +37,37 @@ func NewLexer(name string, input io.Reader) *Lexer {
 	}
 
 	lex.scanner.Init(input)
-	lex.scanner.Mode = scanner.ScanIdents | scanner.ScanInts | scanner.ScanStrings
+	lex.scanner.Mode = scanner.ScanIdents | scanner.ScanInts |
+		scanner.ScanStrings
 
 	return lex
 }
 
-func (lex *Lexer) PeekToken() Token {
-	tok := lex.lexToken()
+func (lex *Lexer) PeekToken() (Token, error) {
+	tok, err := lex.lexToken()
+
+	if err != nil {
+		return tok.Error(), err
+	}
+
 	lex.lookahead.PushBack(tok)
-	return tok
+	return tok, nil
 }
 
-func (lex *Lexer) NextToken() Token {
+func (lex *Lexer) NextToken() (Token, error) {
 	if lex.lookahead.Front() != nil {
 		node := lex.lookahead.Front()
 		tok := node.Value.(Token)
 
 		lex.lookahead.Remove(node)
 
-		return tok
+		return tok, nil
 	}
 
 	return lex.lexToken()
 }
 
-func (lex *Lexer) lexToken() Token {
+func (lex *Lexer) lexToken() (Token, error) {
 	tok := Token{
 		start: lex.scanner.Pos(),
 	}
@@ -102,11 +118,11 @@ func (lex *Lexer) lexToken() Token {
 		tok.kind = tkOperator
 
 	default:
-		tok.kind = tkError
-		tok.value = fmt.Sprintf("unexpected character: %c", scan)
+		return tok.Error(), NewLexError(lex.scanner.Pos(),
+			fmt.Sprintf("unexpected character: %c", scan))
 	}
 
 	tok.end = lex.scanner.Pos()
 
-	return tok
+	return tok, nil
 }
