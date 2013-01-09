@@ -1,7 +1,6 @@
 package main
 
 import (
-	"bytes"
 	"container/list"
 	"fmt"
 	"strings"
@@ -28,7 +27,7 @@ func NewLexer(name, input string) *Lexer {
 	}
 
 	lex.scanner.Init(strings.NewReader(input))
-	lex.scanner.Mode = scanner.ScanIdents | scanner.ScanInts
+	lex.scanner.Mode = scanner.ScanIdents | scanner.ScanInts | scanner.ScanStrings
 
 	return lex
 }
@@ -71,6 +70,9 @@ func (lex *Lexer) lexToken() Token {
 	case scanner.Int:
 		tok.kind = tkNumber
 
+	case scanner.String:
+		tok.kind = tkString
+
 	case '{':
 		tok.kind = tkOpenBrace
 
@@ -83,16 +85,6 @@ func (lex *Lexer) lexToken() Token {
 	case ')':
 		tok.kind = tkCloseParen
 
-	case '"':
-		tok.kind = tkString
-		var eof bool
-		tok.value, eof = lex.lexString()
-
-		if eof {
-			tok.kind = tkError
-			tok.value = "unterminated string constant"
-		}
-
 	default:
 		tok.kind = tkError
 		tok.value = fmt.Sprintf("unexpected character: %c", scan)
@@ -101,26 +93,4 @@ func (lex *Lexer) lexToken() Token {
 	tok.end = lex.scanner.Pos()
 
 	return tok
-}
-
-func (lex *Lexer) lexString() (string, bool) {
-	// disable skipping whitespace
-	lex.scanner.Whitespace = noWhitespace
-	defer func() { lex.scanner.Whitespace = whitespace }()
-
-	var buf bytes.Buffer
-
-	for lex.scanner.Peek() != '"' {
-		next := lex.scanner.Next()
-		if next == scanner.EOF {
-			return buf.String(), true
-		}
-
-		buf.WriteRune(next)
-	}
-
-	// eat last "
-	lex.scanner.Next()
-
-	return buf.String(), false
 }
