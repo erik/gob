@@ -3,7 +3,7 @@ package main
 import (
 	"container/list"
 	"fmt"
-	"strings"
+	"io"
 	"text/scanner"
 )
 
@@ -20,13 +20,13 @@ type Lexer struct {
 const whitespace = 1<<'\t' | 1<<'\n' | 1<<'\r' | 1<<' '
 const noWhitespace = 0
 
-func NewLexer(name, input string) *Lexer {
+func NewLexer(name string, input io.Reader) *Lexer {
 	lex := &Lexer{
 		name:      name,
 		lookahead: list.New(),
 	}
 
-	lex.scanner.Init(strings.NewReader(input))
+	lex.scanner.Init(input)
 	lex.scanner.Mode = scanner.ScanIdents | scanner.ScanInts | scanner.ScanStrings
 
 	return lex
