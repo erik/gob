@@ -66,6 +66,12 @@ func (lex *Lexer) lexToken() Token {
 
 	case scanner.Ident:
 		tok.kind = tkIdent
+		switch tok.value {
+		case "auto", "case", "else", "extrn", "goto", "if",
+			"switch", "while":
+			tok.kind = tkKeyword
+
+		}
 
 	case scanner.Int:
 		tok.kind = tkNumber
@@ -84,6 +90,16 @@ func (lex *Lexer) lexToken() Token {
 
 	case ')':
 		tok.kind = tkCloseParen
+
+	case ';':
+		tok.kind = tkSemicolon
+
+	case ',':
+		tok.kind = tkComma
+
+		// XXX: incomplete list
+	case '+', '-', '*', '/', '%', '=', '&':
+		tok.kind = tkOperator
 
 	default:
 		tok.kind = tkError

@@ -16,6 +16,10 @@ const (
 	tkOpenParen
 	tkCloseParen
 	tkString
+	tkSemicolon
+	tkComma
+	tkKeyword
+	tkOperator // Composite type of all operators
 )
 
 type Token struct {
@@ -44,7 +48,16 @@ func (t TokenType) String() string {
 		return "Close Paren"
 	case tkString:
 		return "String"
+	case tkSemicolon:
+		return "Semicolon"
+	case tkComma:
+		return "Comma"
+	case tkKeyword:
+		return "Keyword"
+	case tkOperator:
+		return "Operator"
 	}
+
 	return "UnknownType"
 
 }
