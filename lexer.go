@@ -16,6 +16,18 @@ type Lexer struct {
 	lookahead *list.List
 }
 
+var keywords = map[string]bool{
+	"auto":   true,
+	"break":  true,
+	"case":   true,
+	"else":   true,
+	"extrn":  true,
+	"goto":   true,
+	"if":     true,
+	"switch": true,
+	"while":  true,
+}
+
 type LexError struct {
 	pos scanner.Position
 	msg string
@@ -99,21 +111,22 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 		tok.kind = tkEof
 
 	case scanner.Ident:
-		tok.kind = tkIdent
-		switch tok.value {
-		case "auto", "case", "else", "extrn", "goto", "if",
-			"switch", "while":
+		if keywords[tok.value] {
 			tok.kind = tkKeyword
-
+		} else {
+			tok.kind = tkIdent
 		}
 
 	case scanner.Int:
 		tok.kind = tkNumber
 		// TODO: this isn't all inclusive
 		if next := lex.scanner.Peek(); unicode.IsLetter(next) {
+			lex.scanner.Scan() // run until end of token
+
 			err = NewLexError(
 				lex.scanner.Pos(),
-				fmt.Sprintf("bad number: %s%c", tok.value, next))
+				fmt.Sprintf("bad number: %s%s", tok.value,
+					lex.scanner.TokenText()))
 
 			return tok.Error(), err
 		}
@@ -141,8 +154,16 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case ',':
 		tok.kind = tkComma
 
-		// XXX: incomplete list
-	case '+', '-', '*', '/', '%', '=', '&':
+		// XXX: some other operators still unhandled
+	case '=', '>', '<', '!':
+		tok.kind = tkOperator
+		if lex.scanner.Peek() == '=' {
+			tok.value = fmt.Sprintf("%s%c", tok.value,
+				lex.scanner.Next())
+
+		}
+
+	case '+', '-', '*', '/', '%', '&':
 		tok.kind = tkOperator
 
 	default:

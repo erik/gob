@@ -47,7 +47,7 @@ func TestLexSanity(t *testing.T) {
 func TestBasicLex(t *testing.T) {
 	in := strings.NewReader(`
 123 "a string with spaces"
-an_identifier_1  `)
+an_identifier_1 auto auto_ `)
 
 	lex := NewLexer("file", in)
 
@@ -65,6 +65,37 @@ an_identifier_1  `)
 	if err != nil || tok.kind != tkIdent || tok.value != "an_identifier_1" {
 		t.Errorf("Ident: %v", tok)
 	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkKeyword || tok.value != "auto" {
+		t.Errorf("Keyword: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkIdent || tok.value != "auto_" {
+		t.Errorf("Not keyword: %v, %v", tok, err)
+	}
+
+}
+
+// Test operator lexing
+func TestLexOp(t *testing.T) {
+	lex := NewLexer("", strings.NewReader(`> = >=`))
+
+	tok, err := lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != ">" {
+		t.Errorf("GT: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != "=" {
+		t.Errorf("EQ: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != ">=" {
+		t.Errorf("GTE: %v, %v", tok, err)
+	}
 }
 
 // Test some exceptional conditions
@@ -76,11 +107,21 @@ func TestExceptional(t *testing.T) {
 		t.Errorf("Unterminated: %v", tok)
 	}
 
-	lex = NewLexer("", strings.NewReader(`123abc`))
+	lex = NewLexer("", strings.NewReader(`123abc xyz`))
 
 	tok, err = lex.NextToken()
 	if err == nil || tok.kind != tkError {
 		t.Errorf("Bad number: %v", tok)
 	}
 
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkIdent || tok.value != "xyz" {
+		t.Errorf("Token after bad number: %v, %v", tok, err)
+	}
+
+	lex = NewLexer("", strings.NewReader(`123 abc`))
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkNumber {
+		t.Errorf("Good number: %v, %v", tok, err)
+	}
 }
