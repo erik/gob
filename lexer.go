@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"io"
 	"text/scanner"
+	"unicode"
 )
 
 const eof int = -1
@@ -67,10 +68,27 @@ func (lex *Lexer) NextToken() (Token, error) {
 	return lex.lexToken()
 }
 
-func (lex *Lexer) lexToken() (Token, error) {
-	tok := Token{
+func (lex *Lexer) lexToken() (tok Token, err error) {
+	tok = Token{
 		start: lex.scanner.Pos(),
 	}
+
+	// Remove error handler
+	defer func() { lex.scanner.Error = nil }()
+
+	// TODO: this is probably horrible style
+	defer func() { recover() }()
+
+	errorHandle := func(s *scanner.Scanner, msg string) {
+		tok = tok.Error()
+		err = NewLexError(lex.scanner.Pos(), msg)
+
+		// Panic to get ourselves out of the parent func, this is
+		// probably terrible form
+		panic("ScanErrorHandle")
+	}
+
+	lex.scanner.Error = errorHandle
 
 	scan := lex.scanner.Scan()
 
@@ -91,9 +109,19 @@ func (lex *Lexer) lexToken() (Token, error) {
 
 	case scanner.Int:
 		tok.kind = tkNumber
+		// TODO: this isn't all inclusive
+		if next := lex.scanner.Peek(); unicode.IsLetter(next) {
+			err = NewLexError(
+				lex.scanner.Pos(),
+				fmt.Sprintf("bad number: %s%c", tok.value, next))
+
+			return tok.Error(), err
+		}
 
 	case scanner.String:
 		tok.kind = tkString
+		// cut out leading/trailing "
+		tok.value = tok.value[1 : len(tok.value)-1]
 
 	case '{':
 		tok.kind = tkOpenBrace
