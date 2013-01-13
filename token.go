@@ -18,6 +18,7 @@ const (
 	tkString
 	tkSemicolon
 	tkComma
+	tkCharacter
 	tkKeyword
 	tkOperator // Composite type of all operators
 )
@@ -61,6 +62,8 @@ func (t TokenType) String() string {
 		return "Semicolon"
 	case tkComma:
 		return "Comma"
+	case tkCharacter:
+		return "Character"
 	case tkKeyword:
 		return "Keyword"
 	case tkOperator:

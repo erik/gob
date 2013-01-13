@@ -154,6 +154,31 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case ',':
 		tok.kind = tkComma
 
+	case '\'':
+		tok.kind = tkCharacter
+		tok.value = ""
+
+	Loop:
+		for {
+			switch char := lex.scanner.Next(); char {
+			case '\n', scanner.EOF:
+				return tok.Error(), NewLexError(lex.scanner.Pos(),
+					fmt.Sprintf("unterminated character: %s",
+						tok.value))
+			case '\'':
+				break Loop
+			default:
+				tok.value = fmt.Sprintf("%s%c", tok.value,
+					char)
+			}
+		}
+
+		if len(tok.value) > 4 {
+			return tok.Error(), NewLexError(lex.scanner.Pos(),
+				fmt.Sprintf("oversized character literal: %s",
+					tok.value))
+		}
+
 		// XXX: some other operators still unhandled
 	case '=', '>', '<', '!':
 		tok.kind = tkOperator

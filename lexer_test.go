@@ -47,7 +47,8 @@ func TestLexSanity(t *testing.T) {
 func TestBasicLex(t *testing.T) {
 	in := strings.NewReader(`
 123 "a string with spaces"
-an_identifier_1 auto auto_ `)
+an_identifier_1 auto auto_
+'char' 'ch' ''`)
 
 	lex := NewLexer("file", in)
 
@@ -76,6 +77,20 @@ an_identifier_1 auto auto_ `)
 		t.Errorf("Not keyword: %v, %v", tok, err)
 	}
 
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkCharacter || tok.value != "char" {
+		t.Errorf("Character: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkCharacter || tok.value != "ch" {
+		t.Errorf("Short character: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkCharacter || tok.value != "" {
+		t.Errorf("Empty character: %v, %v", tok, err)
+	}
 }
 
 // Test operator lexing
@@ -123,5 +138,16 @@ func TestExceptional(t *testing.T) {
 	tok, err = lex.NextToken()
 	if err != nil || tok.kind != tkNumber {
 		t.Errorf("Good number: %v, %v", tok, err)
+	}
+
+	lex = NewLexer("", strings.NewReader(`'oversizedchar' 'unterminated`))
+	tok, err = lex.NextToken()
+	if err == nil || tok.kind != tkError {
+		t.Errorf("Oversized character: %v", tok)
+	}
+
+	tok, err = lex.NextToken()
+	if err == nil || tok.kind != tkError {
+		t.Errorf("Unterminated character: %v", tok)
 	}
 }
