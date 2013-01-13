@@ -48,3 +48,20 @@ func TestParserExpect(t *testing.T) {
 		t.Errorf("Expect type: %v", err)
 	}
 }
+
+func TestParserExternalVarDecl(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`
+varname 1;
+varname 'abcd';
+`))
+
+	node, err := parser.parseExternalVariableDecl()
+	if node == nil || err != nil {
+		t.Errorf("Ext var number: %v", *node)
+	}
+
+	node, err = parser.parseExternalVariableDecl()
+	if node == nil || err != nil {
+		t.Errorf("Ext var character: %v", *node)
+	}
+}

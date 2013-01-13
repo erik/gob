@@ -42,6 +42,55 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
+func (p *Parser) parseBlock() (*Node, error) {
+	return nil, nil
+}
+
+func (p *Parser) parseFuncDeclaration() (*Node, error) {
+	return nil, nil
+}
+
+func (p *Parser) parseExternalVariableDecl() (*Node, error) {
+	var err error
+	var tok *Token
+
+	ident, err := p.expectType(tkIdent)
+
+	if err != nil {
+		return nil, err
+	}
+
+	retNode := ExternVarDeclNode{name: ident.value}
+
+	if tok, err = p.acceptType(tkNumber); tok != nil {
+		retNode.value = IntegerNode{tok.value}
+	} else if tok, err = p.acceptType(tkCharacter); tok != nil {
+		retNode.value = CharacterNode{tok.value}
+	} else {
+		return nil, NewParseError(p.token, "expected value type")
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	tok, err = p.expectType(tkSemicolon)
+
+	var node Node = retNode
+	return &node, err
+}
+
+// function declaration or external variable
+func (p *Parser) parseTopLevel() (*Node, error) {
+	if node, err := p.parseFuncDeclaration(); node != nil {
+		return node, err
+	} else if node, err := p.parseExternalVariableDecl(); node != nil {
+		return node, err
+	}
+
+	return nil, NewParseError(p.token, "expected top level decl")
+}
+
 func (p *Parser) Parse() error {
 	tok, _ := p.lex.NextToken()
 	return NewParseError(tok, "Parser not implemented")
@@ -59,23 +108,22 @@ func (p *Parser) nextToken() (Token, error) {
 }
 
 func (p *Parser) accept(t TokenType, str string) (*Token, error) {
-	var tok *Token = nil
+	var tok Token
 	var err error = nil
 
 	if p.token.kind == t {
 		if str == "" || str == p.token.value {
-			tok = &p.token
+			tok = p.token
+
+			// Get next token if we've matched
+			next, err := p.lex.NextToken()
+			p.token = next
+			return &tok, err
+
 		}
 	}
 
-	// Get next token if we've matched
-	if tok != nil {
-		next, e := p.lex.NextToken()
-		err = e
-		p.token = next
-	}
-
-	return tok, err
+	return nil, err
 }
 
 func (p *Parser) acceptType(t TokenType) (*Token, error) {
