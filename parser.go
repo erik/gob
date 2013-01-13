@@ -63,7 +63,7 @@ func (p *Parser) accept(t TokenType, str string) (*Token, error) {
 	var err error = nil
 
 	if p.token.kind == t {
-		if str == "" || str == tok.value {
+		if str == "" || str == p.token.value {
 			tok = &p.token
 		}
 	}
@@ -90,8 +90,13 @@ func (p *Parser) expect(t TokenType, str string) (*Token, error) {
 	tok, err := p.accept(t, str)
 
 	if tok == nil {
-		return nil, NewParseError(p.token,
-			fmt.Sprintf("Expected %v (%v)", t, str))
+		if str == "" {
+			return nil, NewParseError(p.token,
+				fmt.Sprintf("Expected %v", t))
+		} else {
+			return nil, NewParseError(p.token,
+				fmt.Sprintf("Expected (%v: %v)", t, str))
+		}
 	}
 
 	if err != nil {
