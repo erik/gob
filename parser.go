@@ -31,6 +31,14 @@ func NewParser(name string, input io.Reader) *Parser {
 		nodes: make([]Node, 0, 10),
 	}
 
+	tok, err := parse.lex.NextToken()
+
+	if err != nil {
+		panic(err)
+	}
+
+	parse.token = tok
+
 	return parse
 }
 
@@ -50,14 +58,45 @@ func (p *Parser) nextToken() (Token, error) {
 	return tok, nil
 }
 
-func (p *Parser) expectType(t TokenType) {
+func (p *Parser) accept(t TokenType, str string) (*Token, error) {
+	var tok *Token = nil
+	var err error = nil
 
+	if p.token.kind == t {
+		if str == "" || str == tok.value {
+			tok = &p.token
+		}
+	}
+
+	// Get next token if we've matched
+	if tok != nil {
+		next, e := p.lex.NextToken()
+		err = e
+		p.token = next
+	}
+
+	return tok, err
 }
 
-func (p *Parser) expect(t TokenType, str string) {
-
+func (p *Parser) acceptType(t TokenType) (*Token, error) {
+	return p.accept(t, "")
 }
 
-func (p *Parser) accept(t TokenType) (bool, error) {
-	return false, nil
+func (p *Parser) expectType(t TokenType) (*Token, error) {
+	return p.expect(t, "")
+}
+
+func (p *Parser) expect(t TokenType, str string) (*Token, error) {
+	tok, err := p.accept(t, str)
+
+	if tok == nil {
+		return nil, NewParseError(p.token,
+			fmt.Sprintf("Expected %v (%v)", t, str))
+	}
+
+	if err != nil {
+		return nil, err
+	}
+
+	return tok, nil
 }
