@@ -22,11 +22,13 @@ func NewParseError(tok Token, msg string) error {
 type Parser struct {
 	lex   *Lexer
 	token Token
+	nodes []Node
 }
 
 func NewParser(name string, input io.Reader) *Parser {
 	parse := &Parser{
-		lex: NewLexer(name, input),
+		lex:   NewLexer(name, input),
+		nodes: make([]Node, 0, 10),
 	}
 
 	return parse
@@ -48,9 +50,14 @@ func (p *Parser) nextToken() (Token, error) {
 	return tok, nil
 }
 
-func (p *Parser) expect() {
+func (p *Parser) expectType(t TokenType) {
+
 }
 
-func (p *Parser) accept() bool {
-	return false
+func (p *Parser) expect(t TokenType, str string) {
+
+}
+
+func (p *Parser) accept(t TokenType) (bool, error) {
+	return false, nil
 }
