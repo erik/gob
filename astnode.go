@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"strings"
 )
 
 type NodeType int
@@ -12,11 +13,19 @@ const (
 	ndCharacter
 	ndExtVarDecl
 	ndInteger
+	ndFunction
 )
 
 type Node interface {
 	Type() NodeType
 	String() string
+}
+
+// name '(' (var (',' var)*) ? ')' block
+type FunctionNode struct {
+	name   string
+	params []string
+	block  BlockNode
 }
 
 // '{' node* '}'
@@ -48,6 +57,12 @@ func (b BlockNode) String() string {
 
 	str += "}"
 	return str
+}
+
+func (f FunctionNode) Type() NodeType { return ndFunction }
+func (f FunctionNode) String() string {
+	return fmt.Sprintf("%s(%s) %s",
+		f.name, strings.Join(f.params, ", "), f.block)
 }
 
 func (e ExternVarDeclNode) Type() NodeType { return ndExtVarDecl }

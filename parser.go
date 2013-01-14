@@ -43,11 +43,65 @@ func NewParser(name string, input io.Reader) *Parser {
 }
 
 func (p *Parser) parseBlock() (*Node, error) {
-	return nil, nil
+	if _, err := p.expectType(tkOpenBrace); err != nil {
+		return nil, err
+	}
+
+	// TODO: rest of block
+
+	if _, err := p.expectType(tkCloseBrace); err != nil {
+		return nil, err
+	}
+
+	block := BlockNode{}
+
+	var node Node = block
+
+	return &node, nil
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {
-	return nil, nil
+	var err error
+
+	id, err := p.expectType(tkIdent)
+
+	if err != nil {
+		return nil, err
+	}
+
+	fnNode := FunctionNode{name: id.value}
+
+	if _, err = p.expectType(tkOpenParen); err != nil {
+		return nil, err
+	}
+
+	id, err = p.acceptType(tkIdent)
+	for id != nil && err == nil {
+		fnNode.params = append(fnNode.params, id.value)
+
+		if tok, err := p.acceptType(tkComma); tok == nil || err != nil {
+			break
+		}
+
+		if id, err = p.expectType(tkIdent); err != nil {
+			return nil, err
+		}
+	}
+
+	if _, err = p.expectType(tkCloseParen); err != nil {
+		return nil, err
+	}
+
+	var block *Node
+
+	if block, err = p.parseBlock(); block == nil || err != nil {
+		return nil, err
+	}
+
+	fnNode.block = (*block).(BlockNode)
+
+	var node Node = fnNode
+	return &node, err
 }
 
 func (p *Parser) parseExternalVariableDecl() (*Node, error) {

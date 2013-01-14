@@ -57,11 +57,21 @@ varname 'abcd';
 
 	node, err := parser.parseExternalVariableDecl()
 	if node == nil || err != nil {
-		t.Errorf("Ext var number: %v", *node)
+		t.Errorf("Ext var number: %v", err)
 	}
 
 	node, err = parser.parseExternalVariableDecl()
 	if node == nil || err != nil {
-		t.Errorf("Ext var character: %v", *node)
+		t.Errorf("Ext var character: %v", err)
+	}
+}
+
+// TODO: flesh out this test
+func TestParseFuncDecl(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`main(a,b,c) {}`))
+
+	node, err := parser.parseFuncDeclaration()
+	if node == nil || err != nil {
+		t.Errorf("Func declaration: %v", err)
 	}
 }
