@@ -12,6 +12,7 @@ const (
 	ndBlock
 	ndCharacter
 	ndExtVarDecl
+	ndExtVarInit
 	ndInteger
 	ndFunction
 )
@@ -34,9 +35,13 @@ type BlockNode struct {
 }
 
 // name value ';'
-type ExternVarDeclNode struct {
+type ExternVarInitNode struct {
 	name  string
 	value Node
+}
+
+type ExternVarDeclNode struct {
+	names []string
 }
 
 type IntegerNode struct {
@@ -65,9 +70,14 @@ func (f FunctionNode) String() string {
 		f.name, strings.Join(f.params, ", "), f.block)
 }
 
+func (e ExternVarInitNode) Type() NodeType { return ndExtVarInit }
+func (e ExternVarInitNode) String() string {
+	return fmt.Sprintf("%s %v;", e.name, e.value)
+}
+
 func (e ExternVarDeclNode) Type() NodeType { return ndExtVarDecl }
 func (e ExternVarDeclNode) String() string {
-	return fmt.Sprintf("%s %v;", e.name, e.value)
+	return fmt.Sprintf("extrn %s;", strings.Join(e.names, ", "))
 }
 
 func (i IntegerNode) Type() NodeType { return ndInteger }

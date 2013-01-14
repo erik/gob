@@ -55,12 +55,12 @@ varname 1;
 varname 'abcd';
 `))
 
-	node, err := parser.parseExternalVariableDecl()
+	node, err := parser.parseExternalVariableInit()
 	if node == nil || err != nil {
 		t.Errorf("Ext var number: %v", err)
 	}
 
-	node, err = parser.parseExternalVariableDecl()
+	node, err = parser.parseExternalVariableInit()
 	if node == nil || err != nil {
 		t.Errorf("Ext var character: %v", err)
 	}
@@ -73,5 +73,13 @@ func TestParseFuncDecl(t *testing.T) {
 	node, err := parser.parseFuncDeclaration()
 	if node == nil || err != nil {
 		t.Errorf("Func declaration: %v", err)
+	}
+}
+
+func TestParseExternDecl(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`extrn a,b,c;`))
+
+	if _, err := parser.parseExternVarDecl(); err != nil {
+		t.Errorf("Extern: %v", err)
 	}
 }

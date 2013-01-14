@@ -60,6 +60,53 @@ func (p *Parser) parseBlock() (*Node, error) {
 	return &node, nil
 }
 
+// zero or more comma separated variables
+func (p *Parser) parseVariableList() ([]string, error) {
+
+	var vars []string = nil
+
+	id, err := p.acceptType(tkIdent)
+	for id != nil && err == nil {
+		vars = append(vars, id.value)
+
+		if tok, err := p.acceptType(tkComma); tok == nil || err != nil {
+			break
+		}
+
+		if id, err = p.expectType(tkIdent); err != nil {
+			return nil, err
+		}
+	}
+
+	return vars, nil
+}
+
+func (p *Parser) parseExternVarDecl() (*Node, error) {
+	_, err := p.expect(tkKeyword, "extrn")
+
+	if err != nil {
+		return nil, err
+	}
+
+	varNode := ExternVarDeclNode{}
+
+	if varNode.names, err = p.parseVariableList(); err != nil {
+		return nil, err
+	}
+
+	if _, err = p.expectType(tkSemicolon); err != nil {
+		return nil, err
+	}
+
+	if len(varNode.names) <= 0 {
+		return nil, NewParseError(p.token,
+			"expected at least 1 variable in extrn declaration")
+	}
+
+	var node Node = varNode
+	return &node, nil
+}
+
 func (p *Parser) parseFuncDeclaration() (*Node, error) {
 	var err error
 
@@ -75,17 +122,8 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 		return nil, err
 	}
 
-	id, err = p.acceptType(tkIdent)
-	for id != nil && err == nil {
-		fnNode.params = append(fnNode.params, id.value)
-
-		if tok, err := p.acceptType(tkComma); tok == nil || err != nil {
-			break
-		}
-
-		if id, err = p.expectType(tkIdent); err != nil {
-			return nil, err
-		}
+	if fnNode.params, err = p.parseVariableList(); err != nil {
+		return nil, err
 	}
 
 	if _, err = p.expectType(tkCloseParen); err != nil {
@@ -104,7 +142,7 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 	return &node, err
 }
 
-func (p *Parser) parseExternalVariableDecl() (*Node, error) {
+func (p *Parser) parseExternalVariableInit() (*Node, error) {
 	var err error
 	var tok *Token
 
@@ -114,7 +152,7 @@ func (p *Parser) parseExternalVariableDecl() (*Node, error) {
 		return nil, err
 	}
 
-	retNode := ExternVarDeclNode{name: ident.value}
+	retNode := ExternVarInitNode{name: ident.value}
 
 	if tok, err = p.acceptType(tkNumber); tok != nil {
 		retNode.value = IntegerNode{tok.value}
@@ -138,7 +176,7 @@ func (p *Parser) parseExternalVariableDecl() (*Node, error) {
 func (p *Parser) parseTopLevel() (*Node, error) {
 	if node, err := p.parseFuncDeclaration(); node != nil {
 		return node, err
-	} else if node, err := p.parseExternalVariableDecl(); node != nil {
+	} else if node, err := p.parseExternalVariableInit(); node != nil {
 		return node, err
 	}
 
