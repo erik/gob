@@ -15,6 +15,7 @@ const (
 	ndExtVarInit
 	ndInteger
 	ndFunction
+	ndVarDecl
 )
 
 type Node interface {
@@ -52,6 +53,10 @@ type CharacterNode struct {
 	value string
 }
 
+type VarDeclNode struct {
+	vars []string
+}
+
 func (b BlockNode) Type() NodeType { return ndBlock }
 func (b BlockNode) String() string {
 	str := "{\n"
@@ -85,3 +90,8 @@ func (i IntegerNode) String() string { return i.value }
 
 func (c CharacterNode) Type() NodeType { return ndCharacter }
 func (c CharacterNode) String() string { return fmt.Sprintf("'%s'", c.value) }
+
+func (v VarDeclNode) Type() NodeType { return ndVarDecl }
+func (v VarDeclNode) String() string {
+	return fmt.Sprintf("auto %s;", strings.Join(v.vars, ", "))
+}

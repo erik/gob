@@ -82,9 +82,9 @@ func (p *Parser) parseVariableList() ([]string, error) {
 }
 
 func (p *Parser) parseExternVarDecl() (*Node, error) {
-	_, err := p.expect(tkKeyword, "extrn")
+	var err error
 
-	if err != nil {
+	if _, err = p.expect(tkKeyword, "extrn"); err != nil {
 		return nil, err
 	}
 
@@ -101,6 +101,32 @@ func (p *Parser) parseExternVarDecl() (*Node, error) {
 	if len(varNode.names) <= 0 {
 		return nil, NewParseError(p.token,
 			"expected at least 1 variable in extrn declaration")
+	}
+
+	var node Node = varNode
+	return &node, nil
+}
+
+func (p *Parser) parseVarDecl() (*Node, error) {
+	var err error
+
+	if _, err = p.expect(tkKeyword, "auto"); err != nil {
+		return nil, err
+	}
+
+	varNode := VarDeclNode{}
+
+	if varNode.vars, err = p.parseVariableList(); err != nil {
+		return nil, err
+	}
+
+	if _, err = p.expectType(tkSemicolon); err != nil {
+		return nil, err
+	}
+
+	if len(varNode.vars) <= 0 {
+		return nil, NewParseError(p.token,
+			"expected at least 1 variable in auto declaration")
 	}
 
 	var node Node = varNode

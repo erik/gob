@@ -76,10 +76,20 @@ func TestParseFuncDecl(t *testing.T) {
 	}
 }
 
+// TODO: flesh out this test
 func TestParseExternDecl(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`extrn a,b,c;`))
 
 	if _, err := parser.parseExternVarDecl(); err != nil {
 		t.Errorf("Extern: %v", err)
+	}
+}
+
+// TODO: flesh out this test
+func TestParseVarDecl(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`auto a,b,c;`))
+
+	if _, err := parser.parseVarDecl(); err != nil {
+		t.Errorf("Var: %v", err)
 	}
 }
