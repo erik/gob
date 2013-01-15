@@ -49,9 +49,9 @@ func TestParserExpect(t *testing.T) {
 	}
 }
 
-func TestParserExternalVarDecl(t *testing.T) {
+func TestParserExternalVarInit(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
-varname 1;
+varname 123;
 varname 'abcd';
 `))
 

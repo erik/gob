@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io"
+	"strings"
 )
 
 type ParseError struct {
@@ -41,8 +42,12 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
+func (p *Parser) tokenAt(idx int) Token {
+	return p.tokens[idx]
+}
+
 func (p *Parser) token() Token {
-	return p.tokens[p.tokIdx]
+	return p.tokenAt(p.tokIdx)
 }
 
 func (p *Parser) nextToken() (Token, error) {
@@ -200,12 +205,15 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 
 	retNode := ExternVarInitNode{name: ident.value}
 
-	if tok, err = p.acceptType(tkNumber); tok != nil {
+	switch kind, err := p.expectOneOf(tkNumber, tkCharacter); kind {
+	case tkNumber:
+		tok, err = p.expectType(tkNumber)
 		retNode.value = IntegerNode{tok.value}
-	} else if tok, err = p.acceptType(tkCharacter); tok != nil {
+	case tkCharacter:
+		tok, err = p.expectType(tkCharacter)
 		retNode.value = CharacterNode{tok.value}
-	} else {
-		return nil, NewParseError(p.token(), "expected value type")
+	case tkError:
+		return nil, err
 	}
 
 	if err != nil {
@@ -232,6 +240,24 @@ func (p *Parser) parseTopLevel() (*Node, error) {
 func (p *Parser) Parse() error {
 	tok, _ := p.lex.NextToken()
 	return NewParseError(tok, "Parser not implemented")
+}
+
+// doesn't advance tokIdx
+func (p *Parser) expectOneOf(t ...TokenType) (TokenType, error) {
+	for _, tt := range t {
+		if p.token().kind == tt {
+			return tt, nil
+		}
+	}
+
+	types := make([]string, len(t), len(t))
+
+	for i, tt := range t {
+		types[i] = fmt.Sprintf("%s", tt)
+	}
+
+	return tkError, NewParseError(p.token(),
+		fmt.Sprintf("Expected one of: %s", strings.Join(types, ", ")))
 }
 
 func (p *Parser) accept(t TokenType, str string) (*Token, error) {
