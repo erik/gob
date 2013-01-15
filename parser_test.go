@@ -53,6 +53,7 @@ func TestParserExternalVarInit(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
 varname 123;
 varname 'abcd';
+zero ;
 `))
 
 	node, err := parser.parseExternalVariableInit()
@@ -63,6 +64,11 @@ varname 'abcd';
 	node, err = parser.parseExternalVariableInit()
 	if node == nil || err != nil {
 		t.Errorf("Ext var character: %v", err)
+	}
+
+	node, err = parser.parseExternalVariableInit()
+	if node == nil || err != nil {
+		t.Errorf("Ext var empty: %v", err)
 	}
 }
 

@@ -205,7 +205,7 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 
 	retNode := ExternVarInitNode{name: ident.value}
 
-	switch kind, err := p.expectOneOf(tkNumber, tkCharacter); kind {
+	switch kind, err := p.expectOneOf(tkNumber, tkCharacter, tkSemicolon); kind {
 	case tkNumber:
 		tok, err = p.expectType(tkNumber)
 		retNode.value = IntegerNode{tok.value}
@@ -214,6 +214,10 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		retNode.value = CharacterNode{tok.value}
 	case tkError:
 		return nil, err
+
+		// Empty declarations are zero filled
+	default:
+		retNode.value = IntegerNode{"0"}
 	}
 
 	if err != nil {
