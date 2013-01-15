@@ -13,8 +13,8 @@ const (
 	ndCharacter
 	ndExtVarDecl
 	ndExtVarInit
-	ndInteger
 	ndFunction
+	ndInteger
 	ndVarDecl
 )
 
@@ -23,40 +23,10 @@ type Node interface {
 	String() string
 }
 
-// name '(' (var (',' var)*) ? ')' block
-type FunctionNode struct {
-	name   string
-	params []string
-	block  BlockNode
-}
-
 // '{' node* '}'
 type BlockNode struct {
 	nodes []Node
 }
-
-// name value ';'
-type ExternVarInitNode struct {
-	name  string
-	value Node
-}
-
-type ExternVarDeclNode struct {
-	names []string
-}
-
-type IntegerNode struct {
-	value string
-}
-
-type CharacterNode struct {
-	value string
-}
-
-type VarDeclNode struct {
-	vars []string
-}
-
 func (b BlockNode) Type() NodeType { return ndBlock }
 func (b BlockNode) String() string {
 	str := "{\n"
@@ -69,28 +39,52 @@ func (b BlockNode) String() string {
 	return str
 }
 
+type CharacterNode struct {
+	value string
+}
+func (c CharacterNode) Type() NodeType { return ndCharacter }
+func (c CharacterNode) String() string { return fmt.Sprintf("'%s'", c.value) }
+
+type ExternVarDeclNode struct {
+	names []string
+}
+func (e ExternVarDeclNode) Type() NodeType { return ndExtVarDecl }
+func (e ExternVarDeclNode) String() string {
+	return fmt.Sprintf("extrn %s;", strings.Join(e.names, ", "))
+}
+
+// name value ';'
+type ExternVarInitNode struct {
+	name  string
+	value Node
+}
+func (e ExternVarInitNode) Type() NodeType { return ndExtVarInit }
+func (e ExternVarInitNode) String() string {
+	return fmt.Sprintf("%s %v;", e.name, e.value)
+}
+
+// name '(' (var (',' var)*) ? ')' block
+type FunctionNode struct {
+	name   string
+	params []string
+	block  BlockNode
+}
+
 func (f FunctionNode) Type() NodeType { return ndFunction }
 func (f FunctionNode) String() string {
 	return fmt.Sprintf("%s(%s) %s",
 		f.name, strings.Join(f.params, ", "), f.block)
 }
 
-func (e ExternVarInitNode) Type() NodeType { return ndExtVarInit }
-func (e ExternVarInitNode) String() string {
-	return fmt.Sprintf("%s %v;", e.name, e.value)
+type IntegerNode struct {
+	value string
 }
-
-func (e ExternVarDeclNode) Type() NodeType { return ndExtVarDecl }
-func (e ExternVarDeclNode) String() string {
-	return fmt.Sprintf("extrn %s;", strings.Join(e.names, ", "))
-}
-
 func (i IntegerNode) Type() NodeType { return ndInteger }
 func (i IntegerNode) String() string { return i.value }
 
-func (c CharacterNode) Type() NodeType { return ndCharacter }
-func (c CharacterNode) String() string { return fmt.Sprintf("'%s'", c.value) }
-
+type VarDeclNode struct {
+	vars []string
+}
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
 	return fmt.Sprintf("auto %s;", strings.Join(v.vars, ", "))
