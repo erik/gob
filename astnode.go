@@ -27,6 +27,7 @@ type Node interface {
 type BlockNode struct {
 	nodes []Node
 }
+
 func (b BlockNode) Type() NodeType { return ndBlock }
 func (b BlockNode) String() string {
 	str := "{\n"
@@ -42,12 +43,14 @@ func (b BlockNode) String() string {
 type CharacterNode struct {
 	value string
 }
+
 func (c CharacterNode) Type() NodeType { return ndCharacter }
 func (c CharacterNode) String() string { return fmt.Sprintf("'%s'", c.value) }
 
 type ExternVarDeclNode struct {
 	names []string
 }
+
 func (e ExternVarDeclNode) Type() NodeType { return ndExtVarDecl }
 func (e ExternVarDeclNode) String() string {
 	return fmt.Sprintf("extrn %s;", strings.Join(e.names, ", "))
@@ -58,6 +61,7 @@ type ExternVarInitNode struct {
 	name  string
 	value Node
 }
+
 func (e ExternVarInitNode) Type() NodeType { return ndExtVarInit }
 func (e ExternVarInitNode) String() string {
 	return fmt.Sprintf("%s %v;", e.name, e.value)
@@ -79,12 +83,14 @@ func (f FunctionNode) String() string {
 type IntegerNode struct {
 	value string
 }
+
 func (i IntegerNode) Type() NodeType { return ndInteger }
 func (i IntegerNode) String() string { return i.value }
 
 type VarDeclNode struct {
 	vars []string
 }
+
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
 	return fmt.Sprintf("auto %s;", strings.Join(v.vars, ", "))
