@@ -20,26 +20,46 @@ func NewParseError(tok Token, msg string) error {
 }
 
 type Parser struct {
-	lex   *Lexer
-	token Token
-	nodes []Node
+	lex    *Lexer
+	tokens []Token
+	tokIdx int
+	nodes  []Node
 }
 
 func NewParser(name string, input io.Reader) *Parser {
 	parse := &Parser{
-		lex:   NewLexer(name, input),
-		nodes: make([]Node, 0, 10),
+		lex:    NewLexer(name, input),
+		nodes:  make([]Node, 0, 10),
+		tokens: make([]Token, 0, 10),
+		tokIdx: -1,
 	}
 
-	tok, err := parse.lex.NextToken()
-
-	if err != nil {
+	if _, err := parse.nextToken(); err != nil {
 		panic(err)
 	}
 
-	parse.token = tok
-
 	return parse
+}
+
+func (p *Parser) token() Token {
+	return p.tokens[p.tokIdx]
+}
+
+func (p *Parser) nextToken() (Token, error) {
+	p.tokIdx += 1
+
+	if p.tokIdx < len(p.tokens) {
+		return p.tokens[p.tokIdx], nil
+	}
+
+	tok, err := p.lex.NextToken()
+	if err != nil {
+		return tok, err
+	}
+
+	p.tokens = append(p.tokens, tok)
+
+	return tok, nil
 }
 
 func (p *Parser) parseBlock() (*Node, error) {
@@ -99,7 +119,7 @@ func (p *Parser) parseExternVarDecl() (*Node, error) {
 	}
 
 	if len(varNode.names) <= 0 {
-		return nil, NewParseError(p.token,
+		return nil, NewParseError(p.token(),
 			"expected at least 1 variable in extrn declaration")
 	}
 
@@ -125,7 +145,7 @@ func (p *Parser) parseVarDecl() (*Node, error) {
 	}
 
 	if len(varNode.vars) <= 0 {
-		return nil, NewParseError(p.token,
+		return nil, NewParseError(p.token(),
 			"expected at least 1 variable in auto declaration")
 	}
 
@@ -185,7 +205,7 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 	} else if tok, err = p.acceptType(tkCharacter); tok != nil {
 		retNode.value = CharacterNode{tok.value}
 	} else {
-		return nil, NewParseError(p.token, "expected value type")
+		return nil, NewParseError(p.token(), "expected value type")
 	}
 
 	if err != nil {
@@ -206,7 +226,7 @@ func (p *Parser) parseTopLevel() (*Node, error) {
 		return node, err
 	}
 
-	return nil, NewParseError(p.token, "expected top level decl")
+	return nil, NewParseError(p.token(), "expected top level decl")
 }
 
 func (p *Parser) Parse() error {
@@ -214,28 +234,16 @@ func (p *Parser) Parse() error {
 	return NewParseError(tok, "Parser not implemented")
 }
 
-func (p *Parser) nextToken() (Token, error) {
-	tok, err := p.lex.NextToken()
-
-	if err != nil {
-		return tok, err
-	}
-
-	p.token = tok
-	return tok, nil
-}
-
 func (p *Parser) accept(t TokenType, str string) (*Token, error) {
 	var tok Token
 	var err error = nil
 
-	if p.token.kind == t {
-		if str == "" || str == p.token.value {
-			tok = p.token
+	if p.token().kind == t {
+		if str == "" || str == p.token().value {
+			tok = p.token()
 
 			// Get next token if we've matched
-			next, err := p.lex.NextToken()
-			p.token = next
+			_, err := p.nextToken()
 			return &tok, err
 
 		}
@@ -257,10 +265,10 @@ func (p *Parser) expect(t TokenType, str string) (*Token, error) {
 
 	if tok == nil {
 		if str == "" {
-			return nil, NewParseError(p.token,
+			return nil, NewParseError(p.token(),
 				fmt.Sprintf("Expected %v", t))
 		} else {
-			return nil, NewParseError(p.token,
+			return nil, NewParseError(p.token(),
 				fmt.Sprintf("Expected (%v: %v)", t, str))
 		}
 	}
