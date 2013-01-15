@@ -15,6 +15,7 @@ const (
 	ndExtVarInit
 	ndFunction
 	ndInteger
+	ndString
 	ndVarDecl
 )
 
@@ -90,6 +91,13 @@ func (i IntegerNode) String() string { return i.value }
 type VarDeclNode struct {
 	vars []string
 }
+
+type StringNode struct {
+	value string
+}
+
+func (s StringNode) Type() NodeType { return ndString }
+func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
 
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
