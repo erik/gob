@@ -15,6 +15,7 @@ const (
 	ndExtVarDecl
 	ndExtVarInit
 	ndFunction
+	ndFunctionCall
 	ndIdent
 	ndInteger
 	ndNull
@@ -93,6 +94,21 @@ func (f FunctionNode) Type() NodeType { return ndFunction }
 func (f FunctionNode) String() string {
 	return fmt.Sprintf("%s(%s) %s",
 		f.name, strings.Join(f.params, ", "), f.block)
+}
+
+type FunctionCallNode struct {
+	name string
+	args []Node
+}
+
+func (f FunctionCallNode) Type() NodeType { return ndFunctionCall }
+func (f FunctionCallNode) String() string {
+	args := make([]string, len(f.args), len(f.args))
+	for i, arg := range f.args {
+		args[i] = arg.String()
+	}
+
+	return fmt.Sprintf("%s(%s)", f.name, strings.Join(args, ", "))
 }
 
 type IdentNode struct {
