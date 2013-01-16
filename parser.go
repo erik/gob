@@ -264,6 +264,17 @@ func (p *Parser) parseRValue() (*Node, error) {
 	return nil, nil
 }
 
+func (p *Parser) parseIdent() (*Node, error) {
+	tok, err := p.expectType(tkIdent)
+
+	if err != nil {
+		return nil, err
+	}
+
+	var node Node = IdentNode{tok.value}
+	return &node, nil
+}
+
 // TODO: unfinished, untested
 func (p *Parser) parseLValue() (*Node, error) {
 	if _, err := p.accept(tkOperator, "*"); err == nil {
