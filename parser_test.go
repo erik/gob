@@ -99,3 +99,17 @@ func TestParseVarDecl(t *testing.T) {
 		t.Errorf("Var: %v", err)
 	}
 }
+
+func TestParseParen(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`(((('a'))))
+((unmatched`))
+
+	node, err := parser.parsePrimary()
+	if err != nil || (*node).String() != "'a'" {
+		t.Errorf("Nested paren: %v", err)
+	}
+
+	if node, err := parser.parsePrimary(); err == nil {
+		t.Errorf("Unbalanced paren: %v", *node)
+	}
+}

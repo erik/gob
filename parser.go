@@ -298,11 +298,37 @@ func (p *Parser) parseLValue() (*Node, error) {
 	return nil, NewParseError(p.token(), "expected lvalue")
 }
 
+func (p *Parser) parseParen() (*Node, error) {
+	if _, err := p.expectType(tkOpenParen); err != nil {
+		return nil, err
+	}
+
+	node, err := p.parsePrimary()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkCloseParen); err != nil {
+		return nil, err
+	}
+
+	return node, nil
+}
+
 // TODO: unfinished, untested
 func (p *Parser) parsePrimary() (*Node, error) {
-	if node, err := p.parseLValue(); node != nil {
-		return node, err
+	if node, err := p.parseParen(); err == nil {
+		return node, nil
 	}
+
+	if node, err := p.parseConstant(); err == nil {
+		return node, nil
+	}
+
+	// XXX: mutual recursion
+	// if node, err := p.parseLValue(); err == nil {
+	// 	return node, err
+	// }
 
 	return nil, NewParseError(p.token(), "expected primary expression")
 }
