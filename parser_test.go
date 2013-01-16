@@ -105,7 +105,7 @@ func TestParseParen(t *testing.T) {
 ((unmatched`))
 
 	node, err := parser.parseParen()
-	if err != nil || (*node).String() != "'a'" {
+	if err != nil || (*node).String() != "(((('a'))))" {
 		t.Errorf("Nested paren: %v", err)
 	}
 

@@ -312,7 +312,7 @@ func (p *Parser) parseParen() (*Node, error) {
 		return nil, err
 	}
 
-	node, err := p.parsePrimary()
+	inner, err := p.parsePrimary()
 	if err != nil {
 		return nil, err
 	}
@@ -321,7 +321,8 @@ func (p *Parser) parseParen() (*Node, error) {
 		return nil, err
 	}
 
-	return node, nil
+	var node Node = ParenNode{*inner}
+	return &node, nil
 }
 
 // TODO: unfinished, untested
