@@ -325,25 +325,55 @@ func (p *Parser) parseParen() (*Node, error) {
 }
 
 // TODO: unfinished, untested
-func (p *Parser) parsePrimary() (*Node, error) {
-	if node, err := p.parseParen(); err == nil {
+func (p *Parser) parsePrimary() (node *Node, err error) {
+	if node, err = p.parseParen(); err == nil {
+	} else if node, err = p.parseConstant(); err == nil {
+	} else if node, err = p.parseIdent(); err == nil {
+	} else {
+		return nil, NewParseError(p.token(), "expected primary expression")
+	}
+
+	// Array access
+	if _, ok := p.acceptType(tkOpenBracket); ok {
+		array := *node
+		index, err := p.parsePrimary()
+
+		if err != nil {
+			return nil, err
+		}
+		if _, err := p.expectType(tkCloseBracket); err != nil {
+			return nil, err
+		}
+
+		*node = ArrayAccessNode{array: array, index: *index}
 		return node, nil
 	}
 
-	if node, err := p.parseConstant(); err == nil {
+	// Function call
+	if _, ok := p.acceptType(tkOpenParen); ok {
+		args := make([]Node, 0, 10)
+
+		if p.token().kind != tkCloseParen {
+			for {
+				arg, err := p.parsePrimary()
+				if err != nil {
+					return nil, err
+				}
+				args = append(args, *arg)
+				if _, ok := p.acceptType(tkComma); !ok {
+					break
+				}
+			}
+		}
+
+		if _, err := p.expectType(tkCloseParen); err != nil {
+			return nil, err
+		}
+		*node = FunctionCallNode{callable: *node, args: args}
 		return node, nil
 	}
 
-	if node, err := p.parseIdent(); err == nil {
-		return node, nil
-	}
-
-	// XXX: mutual recursion
-	// if node, err := p.parseLValue(); err == nil {
-	// 	return node, err
-	// }
-
-	return nil, NewParseError(p.token(), "expected primary expression")
+	return node, nil
 }
 
 // TODO: unfinished, untested
