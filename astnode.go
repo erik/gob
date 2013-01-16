@@ -116,13 +116,16 @@ func (s StringNode) Type() NodeType { return ndString }
 func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
 
 type UnaryNode struct {
-	oper string
-	node Node
+	oper    string
+	node    Node
+	postfix bool
 }
 
 func (u UnaryNode) Type() NodeType { return ndUnary }
 func (u UnaryNode) String() string {
-	// TODO: ignores postfix
+	if u.postfix {
+		return fmt.Sprintf("%v%s", u.node, u.oper)
+	}
 	return fmt.Sprintf("%s%v", u.oper, u.node)
 }
 

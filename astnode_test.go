@@ -33,6 +33,10 @@ var nodefmt = []struct {
 	// ExternVarDeclNode
 	{ExternVarDeclNode{[]string{"a", "b", "c"}}, "extrn a, b, c;"},
 
+	// UnaryNode
+	{UnaryNode{"++", IntegerNode{"1"}, false}, "++1"},
+	{UnaryNode{"++", IntegerNode{"1"}, true}, "1++"},
+
 	// VarDeclNode
 	{VarDeclNode{[]string{"a", "b", "c"}}, "auto a, b, c;"},
 }
