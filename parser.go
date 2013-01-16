@@ -195,7 +195,6 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 
 func (p *Parser) parseExternalVariableInit() (*Node, error) {
 	var err error
-	var tok *Token
 
 	ident, err := p.expectType(tkIdent)
 

@@ -15,6 +15,8 @@ const (
 	tkCloseBrace
 	tkOpenParen
 	tkCloseParen
+	tkOpenBracket
+	tkCloseBracket
 	tkString
 	tkSemicolon
 	tkComma
@@ -56,6 +58,10 @@ func (t TokenType) String() string {
 		return "Open Paren"
 	case tkCloseParen:
 		return "Close Paren"
+	case tkOpenBracket:
+		return "Open bracket"
+	case tkCloseBracket:
+		return "Close bracket"
 	case tkString:
 		return "String"
 	case tkSemicolon:

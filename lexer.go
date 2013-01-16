@@ -142,6 +142,12 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case '}':
 		tok.kind = tkCloseBrace
 
+	case '[':
+		tok.kind = tkOpenBracket
+
+	case ']':
+		tok.kind = tkCloseBracket
+
 	case '(':
 		tok.kind = tkOpenParen
 
