@@ -116,8 +116,7 @@ func TestParseParen(t *testing.T) {
 
 func TestParsePrimary(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
-((1)) 123 '123' abc
-`))
+((1)) 123 '123' abc`))
 
 	if _, err := parser.parsePrimary(); err != nil {
 		t.Errorf("Paren primary: %v", err)
@@ -134,6 +133,19 @@ func TestParsePrimary(t *testing.T) {
 	if _, err := parser.parsePrimary(); err != nil {
 		t.Errorf("Ident primary: %v", err)
 	}
+
+	parser = NewParser("name", strings.NewReader(`
+(func)(1,(ab(c)),3)
+((abb(2))[23])[ab(c(d[2]))]
+`))
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Complex func call: %v", err)
+	}
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Complex array access: %v", err)
+	}
+
 }
 
 func TestParseLValue(t *testing.T) {

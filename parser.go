@@ -356,10 +356,12 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 		if p.token().kind != tkCloseParen {
 			for {
 				arg, err := p.parsePrimary()
+
 				if err != nil {
 					return nil, err
 				}
 				args = append(args, *arg)
+
 				if _, ok := p.acceptType(tkComma); !ok {
 					break
 				}
