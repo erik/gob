@@ -106,6 +106,23 @@ func (p *Parser) parseVariableList() ([]string, error) {
 	return vars, nil
 }
 
+func (p *Parser) parseConstant() (*Node, error) {
+	var node Node
+
+	switch kind, tok, err := p.expectOneOf(tkNumber, tkCharacter); kind {
+	case tkNumber:
+		node = IntegerNode{tok.value}
+		return &node, err
+	case tkCharacter:
+		node = CharacterNode{tok.value}
+		return &node, err
+	default:
+		return nil, err
+	}
+
+	return nil, NewParseError(p.token(), "The impossible happened")
+}
+
 func (p *Parser) parseExternVarDecl() (*Node, error) {
 	var err error
 
@@ -204,26 +221,23 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 
 	retNode := ExternVarInitNode{name: ident.value}
 
-	switch kind, err := p.expectOneOf(tkNumber, tkCharacter, tkSemicolon); kind {
-	case tkNumber:
-		tok, err = p.expectType(tkNumber)
-		retNode.value = IntegerNode{tok.value}
-	case tkCharacter:
-		tok, err = p.expectType(tkCharacter)
-		retNode.value = CharacterNode{tok.value}
-	case tkError:
-		return nil, err
-
-		// Empty declarations are zero filled
-	default:
-		retNode.value = IntegerNode{"0"}
+	constant, err := p.parseConstant()
+	if err != nil {
+		if _, err = p.expectType(tkSemicolon); err == nil {
+			// Empty declarations are zero filled
+			retNode.value = IntegerNode{"0"}
+			var node Node = retNode
+			return &node, err
+		}
+	} else {
+		retNode.value = *constant
 	}
 
 	if err != nil {
 		return nil, err
 	}
 
-	tok, err = p.expectType(tkSemicolon)
+	_, err = p.expectType(tkSemicolon)
 
 	var node Node = retNode
 	return &node, err
@@ -249,7 +263,8 @@ func (p *Parser) Parse() error {
 func (p *Parser) expectOneOf(t ...TokenType) (TokenType, error) {
 	for _, tt := range t {
 		if p.token().kind == tt {
-			return tt, nil
+			p.nextToken()
+			return tt, tok, nil
 		}
 	}
 
@@ -259,7 +274,7 @@ func (p *Parser) expectOneOf(t ...TokenType) (TokenType, error) {
 		types[i] = fmt.Sprintf("%s", tt)
 	}
 
-	return tkError, NewParseError(p.token(),
+	return tkError, (&tok).Error(), NewParseError(p.token(),
 		fmt.Sprintf("Expected one of: %s", strings.Join(types, ", ")))
 }
 
