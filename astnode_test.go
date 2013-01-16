@@ -9,6 +9,12 @@ var nodefmt = []struct {
 	node Node
 	str  string
 }{
+	// ArrayAccessNode
+	{ArrayAccessNode{IdentNode{"abc"}, IntegerNode{"2"}}, "abc[2]"},
+
+	// IdentNode
+	{IdentNode{"abcd"}, "abcd"},
+
 	// IntegerNode
 	{IntegerNode{"1234567890"}, "1234567890"},
 
