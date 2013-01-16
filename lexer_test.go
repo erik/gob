@@ -113,6 +113,19 @@ func TestLexOp(t *testing.T) {
 	}
 }
 
+func TestComment(t *testing.T) {
+	lex := NewLexer("",
+		strings.NewReader(`1 /* comment * /* (no nesting) */ 2`))
+
+	if tok, err := lex.NextToken(); err != nil || tok.value != "1" {
+		t.Errorf("Comment (pre): %v, %v", tok, err)
+	}
+
+	if tok, err := lex.NextToken(); err != nil || tok.value != "2" {
+		t.Errorf("Comment (post): %v, %v", tok, err)
+	}
+}
+
 // Test some exceptional conditions
 func TestExceptional(t *testing.T) {
 	lex := NewLexer("", strings.NewReader(`"unterminated string`))
@@ -150,4 +163,17 @@ func TestExceptional(t *testing.T) {
 	if err == nil || tok.kind != tkError {
 		t.Errorf("Unterminated character: %v", tok)
 	}
+
+	lex = NewLexer("", strings.NewReader(`*/ /* unterminated`))
+	// Because Emacs' syntax highlighter is silly: "*/"
+	tok, err = lex.NextToken()
+	if err == nil || tok.kind != tkError {
+		t.Errorf("Unmatched end of comment: %v", tok)
+	}
+
+	tok, err = lex.NextToken()
+	if err == nil || tok.kind != tkError {
+		t.Errorf("Unterminated comment: %v", tok)
+	}
+
 }

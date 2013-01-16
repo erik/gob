@@ -164,7 +164,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 		tok.kind = tkCharacter
 		tok.value = ""
 
-	Loop:
+	endstring:
 		for {
 			switch char := lex.scanner.Next(); char {
 			case '\n', scanner.EOF:
@@ -172,7 +172,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 					fmt.Sprintf("unterminated character: %s",
 						tok.value))
 			case '\'':
-				break Loop
+				break endstring
 			default:
 				tok.value = fmt.Sprintf("%s%c", tok.value,
 					char)
@@ -185,6 +185,38 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 					tok.value))
 		}
 
+	case '/':
+		if lex.scanner.Peek() == '*' {
+			lex.scanner.Next() // eat '*'
+		endcomment:
+			for {
+				switch char := lex.scanner.Next(); char {
+				case scanner.EOF:
+					return tok.Error(),
+						NewLexError(lex.scanner.Pos(),
+							"unterminated comment")
+				case '*':
+					if lex.scanner.Peek() == '/' {
+						lex.scanner.Next()
+						break endcomment
+					}
+				}
+			}
+
+			return lex.NextToken()
+		} else {
+			tok.kind = tkOperator
+		}
+
+	case '*':
+		if lex.scanner.Peek() == '/' {
+			lex.scanner.Next() // eat '/'
+			return tok.Error(), NewLexError(lex.scanner.Pos(),
+				"unexpected end of comment")
+		} else {
+			tok.kind = tkOperator
+		}
+
 		// XXX: some other operators still unhandled
 	case '=', '>', '<', '!':
 		tok.kind = tkOperator
@@ -194,7 +226,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 
 		}
 
-	case '+', '-', '*', '/', '%', '&':
+	case '+', '-', '%', '&':
 		tok.kind = tkOperator
 
 	default:
