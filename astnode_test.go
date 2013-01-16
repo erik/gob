@@ -29,7 +29,8 @@ var nodefmt = []struct {
 	{FunctionNode{"fn", []string{}, BlockNode{}}, "fn() {\n}"},
 
 	// FunctionCallNode
-	{FunctionCallNode{"fn", []Node{IntegerNode{"1"}, CharacterNode{"123"}}},
+	{FunctionCallNode{IdentNode{"fn"}, []Node{IntegerNode{"1"},
+		CharacterNode{"123"}}},
 		"fn(1, '123')"},
 
 	// BlockNode

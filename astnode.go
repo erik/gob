@@ -97,8 +97,8 @@ func (f FunctionNode) String() string {
 }
 
 type FunctionCallNode struct {
-	name string
-	args []Node
+	callable Node
+	args     []Node
 }
 
 func (f FunctionCallNode) Type() NodeType { return ndFunctionCall }
@@ -108,7 +108,7 @@ func (f FunctionCallNode) String() string {
 		args[i] = arg.String()
 	}
 
-	return fmt.Sprintf("%s(%s)", f.name, strings.Join(args, ", "))
+	return fmt.Sprintf("%s(%s)", f.callable, strings.Join(args, ", "))
 }
 
 type IdentNode struct {
