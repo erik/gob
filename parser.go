@@ -87,14 +87,14 @@ func (p *Parser) parseBlock() (*Node, error) {
 
 // zero or more comma separated variables
 func (p *Parser) parseVariableList() ([]string, error) {
-
+	var err error
 	var vars []string = nil
 
-	id, err := p.acceptType(tkIdent)
-	for id != nil && err == nil {
+	id, ok := p.acceptType(tkIdent)
+	for id != nil && ok {
 		vars = append(vars, id.value)
 
-		if tok, err := p.acceptType(tkComma); tok == nil || err != nil {
+		if _, ok := p.acceptType(tkComma); !ok {
 			break
 		}
 
@@ -277,15 +277,20 @@ func (p *Parser) parseIdent() (*Node, error) {
 
 // TODO: unfinished, untested
 func (p *Parser) parseLValue() (*Node, error) {
-	if _, err := p.accept(tkOperator, "*"); err == nil {
+	if _, ok := p.accept(tkOperator, "*"); ok {
 		expr, err := p.parsePrimary()
+
+		if expr == nil {
+			return nil, err
+		}
+
 		var node Node = UnaryNode{oper: "*", node: *expr}
 		return &node, err
+	}
 
-		// Any primary expression followed by bracket can be lvalue
-		// TODO: can it really?
-	} else if arr, err := p.parsePrimary(); err == nil {
-		arrayNode := ArrayAccessNode{array: *arr}
+	// TODO: this should be more than just idents
+	if id, err := p.parseIdent(); err == nil {
+		arrayNode := ArrayAccessNode{array: *id}
 
 		if _, err := p.expectType(tkOpenBracket); err != nil {
 			return nil, NewParseError(p.token(), "expected lvalue")
@@ -336,6 +341,10 @@ func (p *Parser) parsePrimary() (*Node, error) {
 		return node, nil
 	}
 
+	if node, err := p.parseIdent(); err == nil {
+		return node, nil
+	}
+
 	// XXX: mutual recursion
 	// if node, err := p.parseLValue(); err == nil {
 	// 	return node, err
@@ -364,25 +373,28 @@ func (p *Parser) expectOneOf(t ...TokenType) (TokenType, Token, error) {
 		fmt.Sprintf("Expected one of: %s", strings.Join(types, ", ")))
 }
 
-func (p *Parser) accept(t TokenType, str string) (*Token, error) {
+func (p *Parser) accept(t TokenType, str string) (*Token, bool) {
 	var tok Token
-	var err error = nil
 
 	if p.token().kind == t {
 		if str == "" || str == p.token().value {
 			tok = p.token()
 
 			// Get next token if we've matched
-			_, err := p.nextToken()
-			return &tok, err
+			if _, err := p.nextToken(); err != nil {
+				// TODO: handle this
+				panic(err)
+			}
+
+			return &tok, true
 
 		}
 	}
 
-	return nil, err
+	return nil, false
 }
 
-func (p *Parser) acceptType(t TokenType) (*Token, error) {
+func (p *Parser) acceptType(t TokenType) (*Token, bool) {
 	return p.accept(t, "")
 }
 
@@ -391,9 +403,8 @@ func (p *Parser) expectType(t TokenType) (*Token, error) {
 }
 
 func (p *Parser) expect(t TokenType, str string) (*Token, error) {
-	tok, err := p.accept(t, str)
-
-	if tok == nil {
+	tok, ok := p.accept(t, str)
+	if !ok {
 		if str == "" {
 			return nil, NewParseError(p.token(),
 				fmt.Sprintf("Expected %v", t))
@@ -401,10 +412,6 @@ func (p *Parser) expect(t TokenType, str string) (*Token, error) {
 			return nil, NewParseError(p.token(),
 				fmt.Sprintf("Expected (%v: %v)", t, str))
 		}
-	}
-
-	if err != nil {
-		return nil, err
 	}
 
 	return tok, nil
