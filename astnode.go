@@ -15,6 +15,7 @@ const (
 	ndExtVarDecl
 	ndExtVarInit
 	ndFunction
+	ndIdent
 	ndInteger
 	ndString
 	ndUnary
@@ -92,6 +93,13 @@ func (f FunctionNode) String() string {
 	return fmt.Sprintf("%s(%s) %s",
 		f.name, strings.Join(f.params, ", "), f.block)
 }
+
+type IdentNode struct {
+	value string
+}
+
+func (i IdentNode) Type() NodeType { return ndIdent }
+func (i IdentNode) String() string { return i.value }
 
 type IntegerNode struct {
 	value string
