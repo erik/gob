@@ -259,8 +259,57 @@ func (p *Parser) Parse() error {
 	return NewParseError(tok, "Parser not implemented")
 }
 
-// doesn't advance tokIdx
-func (p *Parser) expectOneOf(t ...TokenType) (TokenType, error) {
+// TODO: unfinished, untested
+func (p *Parser) parseRValue() (*Node, error) {
+	return nil, nil
+}
+
+// TODO: unfinished, untested
+func (p *Parser) parseLValue() (*Node, error) {
+	if _, err := p.accept(tkOperator, "*"); err == nil {
+		expr, err := p.parsePrimary()
+		var node Node = UnaryNode{oper: "*", node: *expr}
+		return &node, err
+
+		// Any primary expression followed by bracket can be lvalue
+		// TODO: can it really?
+	} else if arr, err := p.parsePrimary(); err == nil {
+		arrayNode := ArrayAccessNode{array: *arr}
+
+		if _, err := p.expectType(tkOpenBracket); err != nil {
+			return nil, NewParseError(p.token(), "expected lvalue")
+		}
+
+		index, err := p.parsePrimary()
+		if err != nil {
+			return nil, err
+		}
+
+		arrayNode.index = *index
+
+		if _, err := p.expectType(tkCloseBracket); err != nil {
+			return nil, err
+		}
+
+		var node Node = arrayNode
+		return &node, nil
+	}
+
+	return nil, NewParseError(p.token(), "expected lvalue")
+}
+
+// TODO: unfinished, untested
+func (p *Parser) parsePrimary() (*Node, error) {
+	if node, err := p.parseLValue(); node != nil {
+		return node, err
+	}
+
+	return nil, NewParseError(p.token(), "expected primary expression")
+}
+
+func (p *Parser) expectOneOf(t ...TokenType) (TokenType, Token, error) {
+	tok := p.token()
+
 	for _, tt := range t {
 		if p.token().kind == tt {
 			p.nextToken()
