@@ -9,6 +9,7 @@ type NodeType int
 
 const (
 	ndError NodeType = iota
+	ndArrayAccess
 	ndBlock
 	ndCharacter
 	ndExtVarDecl
@@ -22,6 +23,16 @@ const (
 type Node interface {
 	Type() NodeType
 	String() string
+}
+
+type ArrayAccessNode struct {
+	array Node
+	index Node
+}
+
+func (a ArrayAccessNode) Type() NodeType { return ndArrayAccess }
+func (a ArrayAccessNode) String() string {
+	return fmt.Sprintf("%s[%s]", a.array, a.index)
 }
 
 // '{' node* '}'
@@ -87,10 +98,6 @@ type IntegerNode struct {
 
 func (i IntegerNode) Type() NodeType { return ndInteger }
 func (i IntegerNode) String() string { return i.value }
-
-type VarDeclNode struct {
-	vars []string
-}
 
 type StringNode struct {
 	value string
