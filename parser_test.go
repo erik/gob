@@ -104,12 +104,61 @@ func TestParseParen(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`(((('a'))))
 ((unmatched`))
 
-	node, err := parser.parsePrimary()
+	node, err := parser.parseParen()
 	if err != nil || (*node).String() != "'a'" {
 		t.Errorf("Nested paren: %v", err)
 	}
 
-	if node, err := parser.parsePrimary(); err == nil {
+	if node, err := parser.parseParen(); err == nil {
 		t.Errorf("Unbalanced paren: %v", *node)
 	}
+}
+
+func TestParsePrimary(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`
+((1)) 123 '123' abc
+`))
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Paren primary: %v", err)
+	}
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Number primary: %v", err)
+	}
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Character primary: %v", err)
+	}
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("Ident primary: %v", err)
+	}
+}
+
+func TestParseLValue(t *testing.T) {
+	parser := NewParser("name", strings.NewReader(`
+*1 *abc *(123)
+abc[1] abc[(23)]`))
+
+	if _, err := parser.parseLValue(); err != nil {
+		t.Errorf("Deref num: %v", err)
+	}
+
+	if _, err := parser.parseLValue(); err != nil {
+		t.Errorf("Deref ident: %v", err)
+	}
+
+	if _, err := parser.parseLValue(); err != nil {
+		t.Errorf("Deref primary: %v", err)
+	}
+
+	if _, err := parser.parseLValue(); err != nil {
+		t.Errorf("ArrayAccess num: %v", err)
+	}
+
+	if _, err := parser.parseLValue(); err != nil {
+		t.Errorf("ArrayAccess paren: %v", err)
+	}
+
 }
