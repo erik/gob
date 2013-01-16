@@ -19,6 +19,7 @@ const (
 	ndIdent
 	ndInteger
 	ndNull
+	ndParen
 	ndString
 	ndUnary
 	ndVarDecl
@@ -129,6 +130,11 @@ type NullNode struct{}
 
 func (n NullNode) Type() NodeType { return ndNull }
 func (n NullNode) String() string { return "" }
+
+type ParenNode struct{ node Node }
+
+func (p ParenNode) Type() NodeType { return ndParen }
+func (p ParenNode) String() string { return "(" + p.node.String() + ")" }
 
 type StringNode struct {
 	value string
