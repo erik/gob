@@ -42,12 +42,73 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
-func (p *Parser) tokenAt(idx int) Token {
-	return p.tokens[idx]
+func (p *Parser) Parse() error {
+	tok, _ := p.lex.NextToken()
+	return NewParseError(tok, "Parser not implemented")
 }
 
-func (p *Parser) token() Token {
-	return p.tokenAt(p.tokIdx)
+func (p *Parser) accept(t TokenType, str string) (*Token, bool) {
+	var tok Token
+
+	if p.token().kind == t {
+		if str == "" || str == p.token().value {
+			tok = p.token()
+
+			// Get next token if we've matched
+			if _, err := p.nextToken(); err != nil {
+				// TODO: handle this
+				panic(err)
+			}
+
+			return &tok, true
+
+		}
+	}
+
+	return nil, false
+}
+
+func (p *Parser) acceptType(t TokenType) (*Token, bool) {
+	return p.accept(t, "")
+}
+
+func (p *Parser) expect(t TokenType, str string) (*Token, error) {
+	tok, ok := p.accept(t, str)
+	if !ok {
+		if str == "" {
+			return nil, NewParseError(p.token(),
+				fmt.Sprintf("Expected %v", t))
+		} else {
+			return nil, NewParseError(p.token(),
+				fmt.Sprintf("Expected (%v: %v)", t, str))
+		}
+	}
+
+	return tok, nil
+}
+
+func (p *Parser) expectOneOf(t ...TokenType) (TokenType, Token, error) {
+	tok := p.token()
+
+	for _, tt := range t {
+		if p.token().kind == tt {
+			p.nextToken()
+			return tt, tok, nil
+		}
+	}
+
+	types := make([]string, len(t), len(t))
+
+	for i, tt := range t {
+		types[i] = fmt.Sprintf("%s", tt)
+	}
+
+	return tkError, (&tok).Error(), NewParseError(p.token(),
+		fmt.Sprintf("Expected one of: %s", strings.Join(types, ", ")))
+}
+
+func (p *Parser) expectType(t TokenType) (*Token, error) {
+	return p.expect(t, "")
 }
 
 func (p *Parser) nextToken() (Token, error) {
@@ -83,27 +144,6 @@ func (p *Parser) parseBlock() (*Node, error) {
 	var node Node = block
 
 	return &node, nil
-}
-
-// zero or more comma separated variables
-func (p *Parser) parseVariableList() ([]string, error) {
-	var err error
-	var vars []string = nil
-
-	id, ok := p.acceptType(tkIdent)
-	for id != nil && ok {
-		vars = append(vars, id.value)
-
-		if _, ok := p.acceptType(tkComma); !ok {
-			break
-		}
-
-		if id, err = p.expectType(tkIdent); err != nil {
-			return nil, err
-		}
-	}
-
-	return vars, nil
 }
 
 func (p *Parser) parseConstant() (*Node, error) {
@@ -149,30 +189,37 @@ func (p *Parser) parseExternVarDecl() (*Node, error) {
 	return &node, nil
 }
 
-func (p *Parser) parseVarDecl() (*Node, error) {
+func (p *Parser) parseExternalVariableInit() (*Node, error) {
 	var err error
 
-	if _, err = p.expect(tkKeyword, "auto"); err != nil {
+	ident, err := p.expectType(tkIdent)
+
+	if err != nil {
 		return nil, err
 	}
 
-	varNode := VarDeclNode{}
+	retNode := ExternVarInitNode{name: ident.value}
 
-	if varNode.vars, err = p.parseVariableList(); err != nil {
+	constant, err := p.parseConstant()
+	if err != nil {
+		if _, err = p.expectType(tkSemicolon); err == nil {
+			// Empty declarations are zero filled
+			retNode.value = IntegerNode{"0"}
+			var node Node = retNode
+			return &node, err
+		}
+	} else {
+		retNode.value = *constant
+	}
+
+	if err != nil {
 		return nil, err
 	}
 
-	if _, err = p.expectType(tkSemicolon); err != nil {
-		return nil, err
-	}
+	_, err = p.expectType(tkSemicolon)
 
-	if len(varNode.vars) <= 0 {
-		return nil, NewParseError(p.token(),
-			"expected at least 1 variable in auto declaration")
-	}
-
-	var node Node = varNode
-	return &node, nil
+	var node Node = retNode
+	return &node, err
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {
@@ -208,60 +255,6 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 
 	var node Node = fnNode
 	return &node, err
-}
-
-func (p *Parser) parseExternalVariableInit() (*Node, error) {
-	var err error
-
-	ident, err := p.expectType(tkIdent)
-
-	if err != nil {
-		return nil, err
-	}
-
-	retNode := ExternVarInitNode{name: ident.value}
-
-	constant, err := p.parseConstant()
-	if err != nil {
-		if _, err = p.expectType(tkSemicolon); err == nil {
-			// Empty declarations are zero filled
-			retNode.value = IntegerNode{"0"}
-			var node Node = retNode
-			return &node, err
-		}
-	} else {
-		retNode.value = *constant
-	}
-
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = p.expectType(tkSemicolon)
-
-	var node Node = retNode
-	return &node, err
-}
-
-// function declaration or external variable
-func (p *Parser) parseTopLevel() (*Node, error) {
-	if node, err := p.parseFuncDeclaration(); node != nil {
-		return node, err
-	} else if node, err := p.parseExternalVariableInit(); node != nil {
-		return node, err
-	}
-
-	return nil, NewParseError(p.token(), "expected top level decl")
-}
-
-func (p *Parser) Parse() error {
-	tok, _ := p.lex.NextToken()
-	return NewParseError(tok, "Parser not implemented")
-}
-
-// TODO: unfinished, untested
-func (p *Parser) parseRValue() (*Node, error) {
-	return nil, nil
 }
 
 func (p *Parser) parseIdent() (*Node, error) {
@@ -353,66 +346,73 @@ func (p *Parser) parsePrimary() (*Node, error) {
 	return nil, NewParseError(p.token(), "expected primary expression")
 }
 
-func (p *Parser) expectOneOf(t ...TokenType) (TokenType, Token, error) {
-	tok := p.token()
+// TODO: unfinished, untested
+func (p *Parser) parseRValue() (*Node, error) {
+	return nil, nil
+}
 
-	for _, tt := range t {
-		if p.token().kind == tt {
-			p.nextToken()
-			return tt, tok, nil
+// function declaration or external variable
+func (p *Parser) parseTopLevel() (*Node, error) {
+	if node, err := p.parseFuncDeclaration(); node != nil {
+		return node, err
+	} else if node, err := p.parseExternalVariableInit(); node != nil {
+		return node, err
+	}
+
+	return nil, NewParseError(p.token(), "expected top level decl")
+}
+
+func (p *Parser) parseVarDecl() (*Node, error) {
+	var err error
+
+	if _, err = p.expect(tkKeyword, "auto"); err != nil {
+		return nil, err
+	}
+
+	varNode := VarDeclNode{}
+
+	if varNode.vars, err = p.parseVariableList(); err != nil {
+		return nil, err
+	}
+
+	if _, err = p.expectType(tkSemicolon); err != nil {
+		return nil, err
+	}
+
+	if len(varNode.vars) <= 0 {
+		return nil, NewParseError(p.token(),
+			"expected at least 1 variable in auto declaration")
+	}
+
+	var node Node = varNode
+	return &node, nil
+}
+
+// zero or more comma separated variables
+func (p *Parser) parseVariableList() ([]string, error) {
+	var err error
+	var vars []string = nil
+
+	id, ok := p.acceptType(tkIdent)
+	for id != nil && ok {
+		vars = append(vars, id.value)
+
+		if _, ok := p.acceptType(tkComma); !ok {
+			break
+		}
+
+		if id, err = p.expectType(tkIdent); err != nil {
+			return nil, err
 		}
 	}
 
-	types := make([]string, len(t), len(t))
-
-	for i, tt := range t {
-		types[i] = fmt.Sprintf("%s", tt)
-	}
-
-	return tkError, (&tok).Error(), NewParseError(p.token(),
-		fmt.Sprintf("Expected one of: %s", strings.Join(types, ", ")))
+	return vars, nil
 }
 
-func (p *Parser) accept(t TokenType, str string) (*Token, bool) {
-	var tok Token
-
-	if p.token().kind == t {
-		if str == "" || str == p.token().value {
-			tok = p.token()
-
-			// Get next token if we've matched
-			if _, err := p.nextToken(); err != nil {
-				// TODO: handle this
-				panic(err)
-			}
-
-			return &tok, true
-
-		}
-	}
-
-	return nil, false
+func (p *Parser) tokenAt(idx int) Token {
+	return p.tokens[idx]
 }
 
-func (p *Parser) acceptType(t TokenType) (*Token, bool) {
-	return p.accept(t, "")
-}
-
-func (p *Parser) expectType(t TokenType) (*Token, error) {
-	return p.expect(t, "")
-}
-
-func (p *Parser) expect(t TokenType, str string) (*Token, error) {
-	tok, ok := p.accept(t, str)
-	if !ok {
-		if str == "" {
-			return nil, NewParseError(p.token(),
-				fmt.Sprintf("Expected %v", t))
-		} else {
-			return nil, NewParseError(p.token(),
-				fmt.Sprintf("Expected (%v: %v)", t, str))
-		}
-	}
-
-	return tok, nil
+func (p *Parser) token() Token {
+	return p.tokenAt(p.tokIdx)
 }
