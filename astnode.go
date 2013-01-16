@@ -17,6 +17,7 @@ const (
 	ndFunction
 	ndInteger
 	ndString
+	ndUnary
 	ndVarDecl
 )
 
@@ -105,6 +106,21 @@ type StringNode struct {
 
 func (s StringNode) Type() NodeType { return ndString }
 func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
+
+type UnaryNode struct {
+	oper string
+	node Node
+}
+
+func (u UnaryNode) Type() NodeType { return ndUnary }
+func (u UnaryNode) String() string {
+	// TODO: ignores postfix
+	return fmt.Sprintf("%s%v", u.oper, u.node)
+}
+
+type VarDeclNode struct {
+	vars []string
+}
 
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
