@@ -17,6 +17,7 @@ const (
 	ndFunction
 	ndIdent
 	ndInteger
+	ndNull
 	ndString
 	ndUnary
 	ndVarDecl
@@ -107,6 +108,11 @@ type IntegerNode struct {
 
 func (i IntegerNode) Type() NodeType { return ndInteger }
 func (i IntegerNode) String() string { return i.value }
+
+type NullNode struct{}
+
+func (n NullNode) Type() NodeType { return ndNull }
+func (n NullNode) String() string { return "" }
 
 type StringNode struct {
 	value string
