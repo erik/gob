@@ -338,45 +338,6 @@ func (p *Parser) parseIdent() (*Node, error) {
 	return &node, nil
 }
 
-// TODO: unfinished, untested
-func (p *Parser) parseLValue() (*Node, error) {
-	if _, ok := p.accept(tkOperator, "*"); ok {
-		expr, err := p.parsePrimary()
-
-		if expr == nil {
-			return nil, err
-		}
-
-		var node Node = UnaryNode{oper: "*", node: *expr}
-		return &node, err
-	}
-
-	// TODO: this should be more than just idents
-	if id, err := p.parseIdent(); err == nil {
-		arrayNode := ArrayAccessNode{array: *id}
-
-		if _, err := p.expectType(tkOpenBracket); err != nil {
-			return nil, NewParseError(p.token(), "expected lvalue")
-		}
-
-		index, err := p.parsePrimary()
-		if err != nil {
-			return nil, err
-		}
-
-		arrayNode.index = *index
-
-		if _, err := p.expectType(tkCloseBracket); err != nil {
-			return nil, err
-		}
-
-		var node Node = arrayNode
-		return &node, nil
-	}
-
-	return nil, NewParseError(p.token(), "expected lvalue")
-}
-
 func (p *Parser) parseParen() (*Node, error) {
 	if _, err := p.expectType(tkOpenParen); err != nil {
 		return nil, err
@@ -447,11 +408,6 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 	}
 
 	return node, nil
-}
-
-// TODO: unfinished, untested
-func (p *Parser) parseRValue() (*Node, error) {
-	return nil, nil
 }
 
 func (p *Parser) parseStatement() (node *Node, err error) {

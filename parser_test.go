@@ -167,28 +167,28 @@ a=b+++-(--c)*4
 	}
 }
 
-func TestParseLValue(t *testing.T) {
+func TestParseSubExpression(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
 *1 *abc *(123)
 abc[1] abc[(23)]`))
 
-	if _, err := parser.parseLValue(); err != nil {
+	if _, err := parser.parseSubExpression(); err != nil {
 		t.Errorf("Deref num: %v", err)
 	}
 
-	if _, err := parser.parseLValue(); err != nil {
+	if _, err := parser.parseSubExpression(); err != nil {
 		t.Errorf("Deref ident: %v", err)
 	}
 
-	if _, err := parser.parseLValue(); err != nil {
+	if _, err := parser.parseSubExpression(); err != nil {
 		t.Errorf("Deref primary: %v", err)
 	}
 
-	if _, err := parser.parseLValue(); err != nil {
+	if _, err := parser.parseSubExpression(); err != nil {
 		t.Errorf("ArrayAccess num: %v", err)
 	}
 
-	if _, err := parser.parseLValue(); err != nil {
+	if _, err := parser.parseSubExpression(); err != nil {
 		t.Errorf("ArrayAccess paren: %v", err)
 	}
 }
