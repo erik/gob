@@ -135,13 +135,17 @@ func (p *Parser) parseBlock() (*Node, error) {
 
 	block := BlockNode{}
 
-	for _, ok := p.acceptType(tkCloseBrace); !ok; {
+	for p.token().kind != tkCloseBrace {
 		stmt, err := p.parseStatement()
 		if err != nil {
 			return nil, err
 		}
 
 		block.nodes = append(block.nodes, *stmt)
+	}
+
+	if _, err := p.expectType(tkCloseBrace); err != nil {
+		return nil, err
 	}
 
 	var node Node = block
