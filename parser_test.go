@@ -192,3 +192,35 @@ abc[1] abc[(23)]`))
 		t.Errorf("ArrayAccess paren: %v", err)
 	}
 }
+
+func TestParseBlock(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`{a=1;}
+{}
+{{{1;} 2;} 3;}`))
+
+	if _, err := parser.parseBlock(); err != nil {
+		t.Errorf("Simple block: %v", err)
+	}
+
+	if _, err := parser.parseBlock(); err != nil {
+		t.Errorf("Empty block: %v", err)
+	}
+
+	if _, err := parser.parseBlock(); err != nil {
+		t.Errorf("Nested block: %v", err)
+	}
+
+}
+
+func TestParseStatement(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`{{1;}} a=1+2;`))
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Block statement: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Simple statement: %v", err)
+	}
+
+}
