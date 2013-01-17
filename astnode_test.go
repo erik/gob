@@ -47,6 +47,9 @@ var nodefmt = []struct {
 	// ExternVarDeclNode
 	{ExternVarDeclNode{[]string{"a", "b", "c"}}, "extrn a, b, c;"},
 
+	// StatementNode
+	{StatementNode{IntegerNode{"1"}}, "1;"},
+
 	// UnaryNode
 	{UnaryNode{"++", IntegerNode{"1"}, false}, "++1"},
 	{UnaryNode{"++", IntegerNode{"1"}, true}, "1++"},
