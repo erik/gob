@@ -10,6 +10,7 @@ type NodeType int
 const (
 	ndError NodeType = iota
 	ndArrayAccess
+	ndBinary
 	ndBlock
 	ndCharacter
 	ndExtVarDecl
@@ -38,6 +39,17 @@ type ArrayAccessNode struct {
 func (a ArrayAccessNode) Type() NodeType { return ndArrayAccess }
 func (a ArrayAccessNode) String() string {
 	return fmt.Sprintf("%s[%s]", a.array, a.index)
+}
+
+type BinaryNode struct {
+	left, right Node
+	oper        string
+}
+
+func (b BinaryNode) Type() NodeType { return ndBinary }
+func (b BinaryNode) String() string {
+	return fmt.Sprintf("%v %s %v",
+		b.left, b.oper, b.right)
 }
 
 // '{' node* '}'
