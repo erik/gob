@@ -191,5 +191,4 @@ abc[1] abc[(23)]`))
 	if _, err := parser.parseLValue(); err != nil {
 		t.Errorf("ArrayAccess paren: %v", err)
 	}
-
 }

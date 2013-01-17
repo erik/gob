@@ -133,16 +133,18 @@ func (p *Parser) parseBlock() (*Node, error) {
 		return nil, err
 	}
 
-	// TODO: rest of block
-
-	if _, err := p.expectType(tkCloseBrace); err != nil {
-		return nil, err
-	}
-
 	block := BlockNode{}
 
-	var node Node = block
+	for _, ok := p.acceptType(tkCloseBrace); !ok; {
+		stmt, err := p.parseStatement()
+		if err != nil {
+			return nil, err
+		}
 
+		block.nodes = append(block.nodes, *stmt)
+	}
+
+	var node Node = block
 	return &node, nil
 }
 
@@ -309,13 +311,13 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 		return nil, err
 	}
 
-	var block *Node
+	var stmt *Node
 
-	if block, err = p.parseBlock(); block == nil || err != nil {
+	if stmt, err = p.parseStatement(); stmt == nil || err != nil {
 		return nil, err
 	}
 
-	fnNode.block = (*block).(BlockNode)
+	fnNode.body = *stmt
 
 	var node Node = fnNode
 	return &node, err
@@ -446,6 +448,27 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 // TODO: unfinished, untested
 func (p *Parser) parseRValue() (*Node, error) {
 	return nil, nil
+}
+
+func (p *Parser) parseStatement() (node *Node, err error) {
+	pos := p.tokIdx
+
+	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		if _, err := p.expectType(tkSemicolon); err != nil {
+			return nil, err
+		}
+		return node, nil
+	}
+
+	if node, err := p.parseBlock(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
+	return nil, NewParseError(p.tokenAt(pos), "expected statement")
 }
 
 // function declaration or external variable

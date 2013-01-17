@@ -101,13 +101,13 @@ func (e ExternVarInitNode) String() string {
 type FunctionNode struct {
 	name   string
 	params []string
-	block  BlockNode
+	body   Node
 }
 
 func (f FunctionNode) Type() NodeType { return ndFunction }
 func (f FunctionNode) String() string {
 	return fmt.Sprintf("%s(%s) %s",
-		f.name, strings.Join(f.params, ", "), f.block)
+		f.name, strings.Join(f.params, ", "), f.body)
 }
 
 type FunctionCallNode struct {
