@@ -42,9 +42,9 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
-func (p *Parser) Parse() error {
+func (p *Parser) Parse() (*Node, error) {
 	tok, _ := p.lex.NextToken()
-	return NewParseError(tok, "Parser not implemented")
+	return nil, NewParseError(tok, "Parser not implemented")
 }
 
 func (p *Parser) accept(t TokenType, str string) (*Token, bool) {
