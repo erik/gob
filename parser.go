@@ -149,12 +149,15 @@ func (p *Parser) parseBlock() (*Node, error) {
 func (p *Parser) parseConstant() (*Node, error) {
 	var node Node
 
-	switch kind, tok, err := p.expectOneOf(tkNumber, tkCharacter); kind {
+	switch kind, tok, err := p.expectOneOf(tkNumber, tkCharacter, tkString); kind {
 	case tkNumber:
 		node = IntegerNode{tok.value}
 		return &node, err
 	case tkCharacter:
 		node = CharacterNode{tok.value}
+		return &node, err
+	case tkString:
+		node = StringNode{tok.value}
 		return &node, err
 	default:
 		return nil, err

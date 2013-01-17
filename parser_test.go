@@ -116,7 +116,7 @@ func TestParseParen(t *testing.T) {
 
 func TestParsePrimary(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
-((1)) 123 '123' abc`))
+((1)) 123 '123' abc "string"`))
 
 	if _, err := parser.parsePrimary(); err != nil {
 		t.Errorf("Paren primary: %v", err)
@@ -132,6 +132,10 @@ func TestParsePrimary(t *testing.T) {
 
 	if _, err := parser.parsePrimary(); err != nil {
 		t.Errorf("Ident primary: %v", err)
+	}
+
+	if _, err := parser.parsePrimary(); err != nil {
+		t.Errorf("String primary: %v", err)
 	}
 
 	parser = NewParser("name", strings.NewReader(`
