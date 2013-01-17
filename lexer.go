@@ -226,7 +226,17 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 
 		}
 
-	case '+', '-', '%', '&':
+	case '+', '-':
+		tok.kind = tkOperator
+
+		// ++ or --
+		if tok.value == fmt.Sprintf("%c", lex.scanner.Peek()) {
+			lex.scanner.Next()
+			tok.value += tok.value
+
+		}
+
+	case '%', '&':
 		tok.kind = tkOperator
 
 	default:
