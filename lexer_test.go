@@ -95,7 +95,7 @@ an_identifier_1 auto auto_
 
 // Test operator lexing
 func TestLexOp(t *testing.T) {
-	lex := NewLexer("", strings.NewReader(`> = >=`))
+	lex := NewLexer("", strings.NewReader(`> = >= + ++ ---`))
 
 	tok, err := lex.NextToken()
 	if err != nil || tok.kind != tkOperator || tok.value != ">" {
@@ -111,6 +111,27 @@ func TestLexOp(t *testing.T) {
 	if err != nil || tok.kind != tkOperator || tok.value != ">=" {
 		t.Errorf("GTE: %v, %v", tok, err)
 	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != "+" {
+		t.Errorf("Plus: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != "++" {
+		t.Errorf("Inc: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != "--" {
+		t.Errorf("Dec: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkOperator || tok.value != "-" {
+		t.Errorf("Minus: %v, %v", tok, err)
+	}
+
 }
 
 func TestComment(t *testing.T) {
