@@ -463,6 +463,7 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		if _, err := p.expectType(tkSemicolon); err != nil {
 			return nil, err
 		}
+		*node = StatementNode{expr: *node}
 		return node, nil
 	}
 
