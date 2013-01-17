@@ -166,6 +166,48 @@ func (p *Parser) parseConstant() (*Node, error) {
 	return nil, NewParseError(p.token(), "The impossible happened")
 }
 
+func (p *Parser) parseExpression() (*Node, error) {
+	unNode := UnaryNode{oper: ""}
+
+	// Unary prefix operator
+	if tok, ok := p.acceptType(tkOperator); ok {
+		// *, &, -, !, ++, --, and ~.
+		switch tok.value {
+		case "*", "&", "-", "!", "++", "--", "~":
+			unNode = UnaryNode{oper: tok.value, postfix: false}
+		default:
+			return nil, NewParseError(p.token(), "invalid unary op")
+		}
+	}
+
+	expr, err := p.parsePrimary()
+	if err != nil {
+		return nil, err
+	}
+
+	// TODO: this logic is ugly.
+	if unNode.oper != "" {
+		unNode.node = *expr
+		*expr = unNode
+	}
+
+	// Unary postfix operator
+	if tok, ok := p.acceptType(tkOperator); ok {
+		switch tok.value {
+		case "++", "--":
+			unNode = UnaryNode{oper: tok.value,
+				node: *expr, postfix: true}
+			*expr = unNode
+		default:
+			fmt.Println(tok.value)
+		}
+	}
+
+	// TODO: handle opers
+
+	return expr, nil
+}
+
 func (p *Parser) parseExternVarDecl() (*Node, error) {
 	var err error
 
@@ -315,7 +357,7 @@ func (p *Parser) parseParen() (*Node, error) {
 		return nil, err
 	}
 
-	inner, err := p.parsePrimary()
+	inner, err := p.parseExpression()
 	if err != nil {
 		return nil, err
 	}

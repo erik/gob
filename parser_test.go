@@ -152,6 +152,16 @@ func TestParsePrimary(t *testing.T) {
 
 }
 
+func TestParseExpression(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`
+-(!b[2]--)++
+`))
+
+	if _, err := parser.parseExpression(); err != nil {
+		t.Errorf("Expression unary: %v", err)
+	}
+}
+
 func TestParseLValue(t *testing.T) {
 	parser := NewParser("name", strings.NewReader(`
 *1 *abc *(123)
