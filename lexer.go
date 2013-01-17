@@ -221,8 +221,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case '=', '>', '<', '!':
 		tok.kind = tkOperator
 		if lex.scanner.Peek() == '=' {
-			tok.value = fmt.Sprintf("%s%c", tok.value,
-				lex.scanner.Next())
+			tok.value += string(lex.scanner.Next())
 
 		}
 
@@ -230,7 +229,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 		tok.kind = tkOperator
 
 		// ++ or --
-		if tok.value == fmt.Sprintf("%c", lex.scanner.Peek()) {
+		if tok.value == string(lex.scanner.Peek()) {
 			lex.scanner.Next()
 			tok.value += tok.value
 
