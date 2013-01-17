@@ -12,6 +12,9 @@ var nodefmt = []struct {
 	// ArrayAccessNode
 	{ArrayAccessNode{IdentNode{"abc"}, IntegerNode{"2"}}, "abc[2]"},
 
+	// BinaryNode
+	{BinaryNode{IdentNode{"a"}, "==", IdentNode{"b"}}, "a == b"},
+
 	// IdentNode
 	{IdentNode{"abcd"}, "abcd"},
 

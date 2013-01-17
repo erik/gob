@@ -42,8 +42,9 @@ func (a ArrayAccessNode) String() string {
 }
 
 type BinaryNode struct {
-	left, right Node
-	oper        string
+	left  Node
+	oper  string
+	right Node
 }
 
 func (b BinaryNode) Type() NodeType { return ndBinary }
