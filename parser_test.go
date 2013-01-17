@@ -155,10 +155,15 @@ func TestParsePrimary(t *testing.T) {
 func TestParseExpression(t *testing.T) {
 	parser := NewParser("", strings.NewReader(`
 -(!b[2]--)++
+a=b+++-(--c)*4
 `))
 
 	if _, err := parser.parseExpression(); err != nil {
 		t.Errorf("Expression unary: %v", err)
+	}
+
+	if _, err := parser.parseExpression(); err != nil {
+		t.Errorf("Complex expression: %v", err)
 	}
 }
 

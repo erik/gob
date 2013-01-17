@@ -166,7 +166,7 @@ func (p *Parser) parseConstant() (*Node, error) {
 	return nil, NewParseError(p.token(), "The impossible happened")
 }
 
-func (p *Parser) parseExpression() (*Node, error) {
+func (p *Parser) parseSubExpression() (*Node, error) {
 	unNode := UnaryNode{oper: ""}
 
 	// Unary prefix operator
@@ -192,20 +192,39 @@ func (p *Parser) parseExpression() (*Node, error) {
 	}
 
 	// Unary postfix operator
-	if tok, ok := p.acceptType(tkOperator); ok {
-		switch tok.value {
+	if p.token().kind == tkOperator {
+		switch p.token().value {
 		case "++", "--":
-			unNode = UnaryNode{oper: tok.value,
+			unNode = UnaryNode{oper: p.token().value,
 				node: *expr, postfix: true}
 			*expr = unNode
-		default:
-			fmt.Println(tok.value)
+
+			p.nextToken()
 		}
 	}
 
-	// TODO: handle opers
-
 	return expr, nil
+}
+
+func (p *Parser) parseExpression() (*Node, error) {
+	node, err := p.parseSubExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	if tok, ok := p.acceptType(tkOperator); ok {
+		bin := BinaryNode{left: *node, oper: tok.value}
+		rhs, err := p.parseExpression()
+		if err != nil {
+			return nil, err
+		}
+
+		bin.right = *rhs
+
+		*node = bin
+		return node, nil
+	}
+	return node, nil
 }
 
 func (p *Parser) parseExternVarDecl() (*Node, error) {
