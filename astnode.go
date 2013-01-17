@@ -21,6 +21,7 @@ const (
 	ndInteger
 	ndNull
 	ndParen
+	ndStatement
 	ndString
 	ndUnary
 	ndVarDecl
@@ -148,6 +149,13 @@ type ParenNode struct{ node Node }
 
 func (p ParenNode) Type() NodeType { return ndParen }
 func (p ParenNode) String() string { return "(" + p.node.String() + ")" }
+
+type StatementNode struct {
+	expr Node
+}
+
+func (s StatementNode) Type() NodeType { return ndStatement }
+func (s StatementNode) String() string { return fmt.Sprintf("%v;", s.expr) }
 
 type StringNode struct {
 	value string
