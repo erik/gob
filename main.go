@@ -3,6 +3,7 @@ package main
 import (
 	"flag"
 	"fmt"
+	"github.com/boredomist/gob/parse"
 	"os"
 )
 
@@ -25,7 +26,7 @@ func main() {
 			os.Exit(1)
 		}
 
-		parser := NewParser(name, file)
+		parser := parse.NewParser(name, file)
 
 		node, err := parser.Parse()
 		if err != nil {
