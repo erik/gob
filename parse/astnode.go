@@ -22,6 +22,7 @@ const (
 	ndIdent
 	ndIf
 	ndInteger
+	ndLabel
 	ndNull
 	ndParen
 	ndReturn
@@ -198,6 +199,11 @@ func (i IfNode) String() string {
 
 func (i IntegerNode) Type() NodeType { return ndInteger }
 func (i IntegerNode) String() string { return i.value }
+
+type LabelNode struct{ name string }
+
+func (l LabelNode) Type() NodeType { return ndLabel }
+func (l LabelNode) String() string { return l.name + ":" }
 
 type NullNode struct{}
 
