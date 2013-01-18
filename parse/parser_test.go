@@ -215,7 +215,10 @@ func TestParseBlock(t *testing.T) {
 func TestParseStatement(t *testing.T) {
 	parser := NewParser("", strings.NewReader(`{{1;}}
 a=1+2;
-if(a + b == c) statement; else other_statement;`))
+if(a + b == c) statement; else other_statement;
+auto a, b, c;
+extrn a, b, c;
+`))
 
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("Block statement: %v", err)
@@ -229,6 +232,13 @@ if(a + b == c) statement; else other_statement;`))
 		t.Errorf("If statement: %v", err)
 	}
 
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Auto var decl statement: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Extern var decl statement: %v", err)
+	}
 }
 
 // TODO: I'm only sort of sure about the correctness of these

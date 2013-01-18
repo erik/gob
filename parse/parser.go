@@ -482,6 +482,24 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return node, nil
 	}
 
+	if node, err := p.parseBlock(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
+	if node, err := p.parseVarDecl(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
+	if node, err := p.parseExternVarDecl(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {
@@ -489,12 +507,6 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 			return nil, err
 		}
 		*node = StatementNode{expr: *node}
-		return node, nil
-	}
-
-	if node, err := p.parseBlock(); err != nil && p.tokIdx != pos {
-		return nil, err
-	} else if err == nil {
 		return node, nil
 	}
 
