@@ -24,6 +24,7 @@ var keywords = map[string]bool{
 	"extrn":  true,
 	"goto":   true,
 	"if":     true,
+	"return": true,
 	"switch": true,
 	"while":  true,
 }

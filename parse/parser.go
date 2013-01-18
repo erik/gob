@@ -542,6 +542,26 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return &brk, nil
 	}
 
+	if _, ok := p.accept(tkKeyword, "return"); ok {
+		var retNode ReturnNode
+		if _, ok := p.acceptType(tkSemicolon); ok {
+			retNode.node = NullNode{}
+		} else {
+			node, err := p.parseExpression()
+			if err != nil {
+				return nil, err
+			}
+
+			if _, err := p.expectType(tkSemicolon); err != nil {
+				return nil, err
+			}
+			retNode.node = *node
+		}
+
+		var node Node = retNode
+		return &node, nil
+	}
+
 	if _, ok := p.accept(tkKeyword, "goto"); ok {
 		var tok *Token = nil
 

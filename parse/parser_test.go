@@ -223,6 +223,8 @@ while(true == false) { foo(bar[baz]); }
 if(true) ; else ;
 break;
 goto label;
+return /* blank */;
+return (123+456);
 `))
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -263,6 +265,14 @@ goto label;
 
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("Goto statement: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Return blank: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Return statement: %v", err)
 	}
 
 }
@@ -328,13 +338,13 @@ func TestParse(t *testing.T) {
 a 1; b 2; c 3;
 
 func1(a,b,c) {
-  func(a + b + c);
+  return func(a + b + c);
 }
 
-func() {
+func(w) {
   auto x,y,z;
   x = a; y = b; z = c;
-  w/x+y*z;
+  return w/x+y*z;
 }
 `))
 
