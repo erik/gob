@@ -7,6 +7,8 @@ import (
 	"os"
 )
 
+const GOB_VERSION = "0.0.0"
+
 var (
 	showVersion = flag.Bool("version", false, "Show version info")
 	// TODO: other
@@ -16,7 +18,7 @@ func main() {
 	flag.Parse()
 
 	if *showVersion {
-		fmt.Println("Gob 0.0.0")
+		fmt.Printf("Gob v%s\n", GOB_VERSION)
 	}
 
 	for _, name := range flag.Args() {
