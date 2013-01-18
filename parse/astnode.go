@@ -26,6 +26,7 @@ const (
 	ndString
 	ndUnary
 	ndVarDecl
+	ndWhile
 )
 
 type Node interface {
@@ -224,4 +225,14 @@ type VarDeclNode struct {
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
 	return fmt.Sprintf("auto %s;", strings.Join(v.vars, ", "))
+}
+
+type WhileNode struct {
+	cond Node
+	body Node
+}
+
+func (w WhileNode) Type() NodeType { return ndWhile }
+func (w WhileNode) String() string {
+	return fmt.Sprintf("while(%v) %v", w.cond, w.body)
 }
