@@ -225,6 +225,9 @@ break;
 goto label;
 return /* blank */;
 return (123+456);
+label:
+not_label;
+definitelyNotLabel():
 `))
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -256,7 +259,7 @@ return (123+456);
 	}
 
 	if _, err := parser.parseStatement(); err != nil {
-		t.Errorf("If statement null: %v", err)
+		t.Errorf("If statement: %v", err)
 	}
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -273,6 +276,24 @@ return (123+456);
 
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("Return statement: %v", err)
+	}
+
+	node, err := parser.parseStatement()
+	if err != nil {
+		t.Errorf("label statement: %v", err)
+	} else if lbl, ok := (*node).(LabelNode); !ok || lbl.name != "label" {
+		t.Errorf("Label incorrect: %v", lbl)
+	}
+
+	node, err = parser.parseStatement()
+	if err != nil {
+		t.Errorf("label statement: %v", err)
+	} else if lbl, ok := (*node).(LabelNode); ok {
+		t.Errorf("Not-Label: %v", lbl)
+	}
+
+	if node, err := parser.parseStatement(); err == nil {
+		t.Errorf("Bad label: %v", *node)
 	}
 
 }

@@ -578,6 +578,19 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return &gt, nil
 	}
 
+	if tok, ok := p.acceptType(tkIdent); ok {
+		if _, ok := p.acceptType(tkColon); ok {
+			var node Node = LabelNode{tok.value}
+			return &node, nil
+		} else if _, ok := p.acceptType(tkSemicolon); ok {
+			var node Node = StatementNode{IdentNode{tok.value}}
+			return &node, nil
+		}
+
+		// rewind
+		p.tokIdx = pos
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {

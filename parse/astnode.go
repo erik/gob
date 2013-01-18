@@ -203,7 +203,7 @@ func (i IntegerNode) String() string { return i.value }
 type LabelNode struct{ name string }
 
 func (l LabelNode) Type() NodeType { return ndLabel }
-func (l LabelNode) String() string { return l.name + ":" }
+func (l LabelNode) String() string { return fmt.Sprintf("%s:", l.name) }
 
 type NullNode struct{}
 

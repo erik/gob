@@ -158,6 +158,9 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case ';':
 		tok.kind = tkSemicolon
 
+	case ':':
+		tok.kind = tkColon
+
 	case ',':
 		tok.kind = tkComma
 
