@@ -70,6 +70,13 @@ var nodefmt = []struct {
 
 	// VarDeclNode
 	{VarDeclNode{[]string{"a", "b", "c"}}, "auto a, b, c;"},
+
+	// WhileNode
+	{WhileNode{BinaryNode{IdentNode{"a"}, ">", IdentNode{"b"}},
+		StatementNode{BinaryNode{IdentNode{"a"}, "=",
+			BinaryNode{IdentNode{"a"}, "-",
+				IdentNode{"b"}}}}},
+		"while(a > b) a = a - b;"},
 }
 
 func TestNodeString(t *testing.T) {
