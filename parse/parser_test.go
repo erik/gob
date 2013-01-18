@@ -219,6 +219,8 @@ if(a + b == c) statement; else other_statement;
 auto a, b, c;
 extrn a, b, c;
 while(true == false) { foo(bar[baz]); }
+;
+if(true) ; else ;
 `))
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -245,6 +247,13 @@ while(true == false) { foo(bar[baz]); }
 		t.Errorf("While statement: %v", err)
 	}
 
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Null statement: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("If statement null: %v", err)
+	}
 }
 
 // TODO: I'm only sort of sure about the correctness of these
