@@ -511,6 +511,15 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return &null, nil
 	}
 
+	if _, ok := p.accept(tkKeyword, "break"); ok {
+		if _, err := p.expectType(tkSemicolon); err != nil {
+			return nil, err
+		}
+
+		var brk Node = BreakNode{}
+		return &brk, nil
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {

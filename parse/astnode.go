@@ -12,6 +12,7 @@ const (
 	ndArrayAccess
 	ndBinary
 	ndBlock
+	ndBreak
 	ndCharacter
 	ndExtVarDecl
 	ndExtVarInit
@@ -92,6 +93,11 @@ func (b BlockNode) String() string {
 	str += "}"
 	return str
 }
+
+type BreakNode struct{}
+
+func (b BreakNode) Type() NodeType { return ndBreak }
+func (b BreakNode) String() string { return "break;" }
 
 type CharacterNode struct {
 	value string

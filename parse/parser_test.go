@@ -221,6 +221,7 @@ extrn a, b, c;
 while(true == false) { foo(bar[baz]); }
 ;
 if(true) ; else ;
+break;
 `))
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -253,6 +254,10 @@ if(true) ; else ;
 
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("If statement null: %v", err)
+	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Break statement: %v", err)
 	}
 }
 
