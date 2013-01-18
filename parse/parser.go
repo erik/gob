@@ -500,6 +500,12 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return node, nil
 	}
 
+	if node, err := p.parseWhile(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {
@@ -571,10 +577,32 @@ func (p *Parser) parseVariableList() ([]string, error) {
 	return vars, nil
 }
 
-func (p *Parser) tokenAt(idx int) Token {
-	return p.tokens[idx]
+func (p *Parser) parseWhile() (*Node, error) {
+	if _, err := p.expect(tkKeyword, "while"); err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkOpenBrace); err != nil {
+		return nil, err
+	}
+
+	cond, err := p.parseExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkCloseBrace); err != nil {
+		return nil, err
+	}
+
+	body, err := p.parseStatement()
+	if err != nil {
+		return nil, err
+	}
+
+	var node Node = WhileNode{cond: *cond, body: *body}
+	return &node, nil
 }
 
-func (p *Parser) token() Token {
-	return p.tokenAt(p.tokIdx)
-}
+func (p *Parser) tokenAt(idx int) Token { return p.tokens[idx] }
+func (p *Parser) token() Token          { return p.tokenAt(p.tokIdx) }
