@@ -173,7 +173,7 @@ func (i IfNode) String() string {
 		elseStr = fmt.Sprintf(" else %v", i.elseBody)
 	}
 
-	return fmt.Sprintf("if(%v) %v %s", i.cond, i.body, elseStr)
+	return fmt.Sprintf("if(%v) %v%s", i.cond, i.body, elseStr)
 }
 
 func (i IntegerNode) Type() NodeType { return ndInteger }

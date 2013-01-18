@@ -18,6 +18,20 @@ var nodefmt = []struct {
 	// IdentNode
 	{IdentNode{"abcd"}, "abcd"},
 
+	// IfNode
+	{IfNode{cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
+		body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
+			[]Node{}}},
+		hasElse: false},
+		"if(a < b) do_this();"},
+	{IfNode{cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
+		body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
+			[]Node{}}},
+		hasElse: true,
+		elseBody: StatementNode{FunctionCallNode{IdentNode{"do_that"},
+			[]Node{}}}},
+		"if(a < b) do_this(); else do_that();"},
+
 	// IntegerNode
 	{IntegerNode{"1234567890"}, "1234567890"},
 
