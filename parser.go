@@ -476,6 +476,12 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 func (p *Parser) parseStatement() (node *Node, err error) {
 	pos := p.tokIdx
 
+	if node, err := p.parseIf(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {

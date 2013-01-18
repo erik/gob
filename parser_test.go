@@ -213,7 +213,9 @@ func TestParseBlock(t *testing.T) {
 }
 
 func TestParseStatement(t *testing.T) {
-	parser := NewParser("", strings.NewReader(`{{1;}} a=1+2;`))
+	parser := NewParser("", strings.NewReader(`{{1;}}
+a=1+2;
+if(a + b == c) statement; else other_statement;`))
 
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("Block statement: %v", err)
@@ -223,6 +225,10 @@ func TestParseStatement(t *testing.T) {
 		t.Errorf("Simple statement: %v", err)
 	}
 
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("If statement: %v", err)
+	}
+
 }
 
 // TODO: I'm only sort of sure about the correctness of these
@@ -230,6 +236,7 @@ func TestParseOperatorPrecedence(t *testing.T) {
 	parser := NewParser("", strings.NewReader(`
 a=b+c---d /* (a = (b + (c-- - d))) */
 a+2*--a=b=c /* ((a + (2 * --a)) = (b = c)) */
+a=b=c+d=e
 `))
 
 	node, err := parser.parseExpression()
@@ -251,6 +258,17 @@ a+2*--a=b=c /* ((a + (2 * --a)) = (b = c)) */
 		"((a + (2 * --a)) = (b = c))" {
 		t.Errorf("Bad precedence: %s", str)
 	}
+
+	node, err = parser.parseExpression()
+	if err != nil {
+		t.Errorf("Operator parse: %v", err)
+	}
+
+	if str := (*node).(BinaryNode).StringWithPrecedence(); str !=
+		"(a = (b = ((c + d) = e)))" {
+		t.Errorf("Bad precedence: %s", str)
+	}
+
 }
 
 func TestParseIf(t *testing.T) {
