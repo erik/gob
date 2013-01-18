@@ -18,6 +18,7 @@ const (
 	ndFunction
 	ndFunctionCall
 	ndIdent
+	ndIf
 	ndInteger
 	ndNull
 	ndParen
@@ -155,6 +156,24 @@ func (i IdentNode) String() string { return i.value }
 
 type IntegerNode struct {
 	value string
+}
+
+type IfNode struct {
+	cond     Node
+	body     Node
+	hasElse  bool
+	elseBody Node
+}
+
+func (i IfNode) Type() NodeType { return ndIf }
+func (i IfNode) String() string {
+	var elseStr string = ""
+
+	if i.hasElse {
+		elseStr = fmt.Sprintf(" else %v", i.elseBody)
+	}
+
+	return fmt.Sprintf("if(%v) %v %s", i.cond, i.body, elseStr)
 }
 
 func (i IntegerNode) Type() NodeType { return ndInteger }
