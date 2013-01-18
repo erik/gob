@@ -222,6 +222,7 @@ while(true == false) { foo(bar[baz]); }
 ;
 if(true) ; else ;
 break;
+goto label;
 `))
 
 	if _, err := parser.parseStatement(); err != nil {
@@ -259,6 +260,11 @@ break;
 	if _, err := parser.parseStatement(); err != nil {
 		t.Errorf("Break statement: %v", err)
 	}
+
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Goto statement: %v", err)
+	}
+
 }
 
 // TODO: I'm only sort of sure about the correctness of these

@@ -520,6 +520,22 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return &brk, nil
 	}
 
+	if _, ok := p.accept(tkKeyword, "goto"); ok {
+		var tok *Token = nil
+
+		if tok, err = p.expectType(tkIdent); err != nil {
+			return nil, err
+		}
+
+		var gt Node = GotoNode{label: IdentNode{tok.value}}
+
+		if _, err := p.expectType(tkSemicolon); err != nil {
+			return nil, err
+		}
+
+		return &gt, nil
+	}
+
 	if node, err := p.parseExpression(); err != nil && p.tokIdx != pos {
 		return nil, err
 	} else if err == nil {

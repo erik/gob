@@ -18,6 +18,7 @@ const (
 	ndExtVarInit
 	ndFunction
 	ndFunctionCall
+	ndGoto
 	ndIdent
 	ndIf
 	ndInteger
@@ -153,6 +154,11 @@ func (f FunctionCallNode) String() string {
 
 	return fmt.Sprintf("%s(%s)", f.callable, strings.Join(args, ", "))
 }
+
+type GotoNode struct{ label Node }
+
+func (g GotoNode) Type() NodeType { return ndGoto }
+func (g GotoNode) String() string { return fmt.Sprintf("goto %v;", g.label) }
 
 type IdentNode struct {
 	value string
