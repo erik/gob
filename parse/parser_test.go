@@ -321,3 +321,40 @@ if (a + b < c) do_that(); else { do_this(); do_that(); }
 		t.Errorf("If with else: %v", err)
 	}
 }
+
+func TestParse(t *testing.T) {
+	parser := NewParser("my_file.b", strings.NewReader(`
+/* This is a translation unit */
+a 1; b 2; c 3;
+
+func1(a,b,c) {
+  func(a + b + c);
+}
+
+func() {
+  auto x,y,z;
+  x = a; y = b; z = c;
+  w/x+y*z;
+}
+`))
+
+	unit, err := parser.Parse()
+	if err != nil {
+		t.Errorf("Parse unit: %v", err)
+	}
+
+	if unit.file != "my_file.b" {
+		t.Errorf("Unit name: %s", unit.file)
+	}
+
+	if len(unit.funcs) != 2 {
+		t.Errorf("Function definitions (got %d): %v", len(unit.funcs),
+			unit.funcs)
+	}
+
+	if len(unit.vars) != 3 {
+		t.Errorf("Var definitions (got %d): %v", len(unit.vars),
+			unit.vars)
+	}
+
+}

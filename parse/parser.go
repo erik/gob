@@ -472,7 +472,7 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 
 		if p.token().kind != tkCloseParen {
 			for {
-				arg, err := p.parsePrimary()
+				arg, err := p.parseExpression()
 
 				if err != nil {
 					return nil, err
@@ -575,13 +575,14 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 func (p *Parser) parseTopLevel() (node *Node, err error) {
 	pos := p.tokIdx
 
-	if node, err := p.parseFuncDeclaration(); err == nil {
+	if node, err := p.parseExternalVariableInit(); err == nil {
 		return node, nil
 	} else if p.tokIdx != pos {
-		return nil, err
+		// Rewind to previous position (XXX: might hide errors)
+		p.tokIdx = pos
 	}
 
-	if node, err := p.parseExternalVariableInit(); node != nil {
+	if node, err := p.parseFuncDeclaration(); err == nil {
 		return node, nil
 	} else if p.tokIdx != pos {
 		return nil, err
