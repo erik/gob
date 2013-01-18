@@ -359,6 +359,48 @@ func (p *Parser) parseIdent() (*Node, error) {
 	return &node, nil
 }
 
+func (p *Parser) parseIf() (*Node, error) {
+	if _, err := p.expect(tkKeyword, "if"); err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkOpenParen); err != nil {
+		return nil, err
+	}
+
+	cond, err := p.parseExpression()
+	if err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkCloseParen); err != nil {
+		return nil, err
+	}
+
+	trueBody, err := p.parseStatement()
+	if err != nil {
+		return nil, err
+	}
+
+	var elseBody Node
+	var hasElse = false
+
+	if _, ok := p.accept(tkKeyword, "else"); ok {
+		hasElse = true
+		els, err := p.parseStatement()
+		if err != nil {
+			return nil, err
+		}
+
+		elseBody = *els
+	}
+
+	var node Node = IfNode{cond: *cond, body: *trueBody, hasElse: hasElse,
+		elseBody: elseBody}
+	return &node, nil
+
+}
+
 func (p *Parser) parseParen() (*Node, error) {
 	if _, err := p.expectType(tkOpenParen); err != nil {
 		return nil, err
