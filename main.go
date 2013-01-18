@@ -30,11 +30,11 @@ func main() {
 
 		parser := parse.NewParser(name, file)
 
-		node, err := parser.Parse()
+		unit, err := parser.Parse()
 		if err != nil {
 			fmt.Println(err)
 		} else {
-			fmt.Println(*node)
+			fmt.Println(unit)
 		}
 	}
 
