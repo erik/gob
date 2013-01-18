@@ -582,7 +582,7 @@ func (p *Parser) parseWhile() (*Node, error) {
 		return nil, err
 	}
 
-	if _, err := p.expectType(tkOpenBrace); err != nil {
+	if _, err := p.expectType(tkOpenParen); err != nil {
 		return nil, err
 	}
 
@@ -591,7 +591,7 @@ func (p *Parser) parseWhile() (*Node, error) {
 		return nil, err
 	}
 
-	if _, err := p.expectType(tkCloseBrace); err != nil {
+	if _, err := p.expectType(tkCloseParen); err != nil {
 		return nil, err
 	}
 
