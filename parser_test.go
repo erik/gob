@@ -252,3 +252,18 @@ a+2*--a=b=c /* ((a + (2 * --a)) = (b = c)) */
 		t.Errorf("Bad precedence: %s", str)
 	}
 }
+
+func TestParseIf(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`
+if (a + b < c) { do_this(); and_this(); }
+if (a + b < c) do_that(); else { do_this(); do_that(); }
+`))
+
+	if _, err := parser.parseIf(); err != nil {
+		t.Errorf("If with no else: %v", err)
+	}
+
+	if _, err := parser.parseIf(); err != nil {
+		t.Errorf("If with else: %v", err)
+	}
+}
