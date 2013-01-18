@@ -1,4 +1,4 @@
-# gob [![Build Status](https://travis-ci.org/boredomist/gob.png?branch=master)](undefined)
+# gob [![Build Status](https://travis-ci.org/boredomist/gob.png?branch=master)](https://travis-ci.org/boredomist/gob)
 
 Gob is an implementation of the B language, written in Go.
 
