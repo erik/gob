@@ -56,8 +56,22 @@ func (b BinaryNode) String() string {
 
 // Use parens to make precedence more apparent
 func (b BinaryNode) StringWithPrecedence() string {
+	var left, right string
+
+	if bin, ok := b.left.(BinaryNode); ok {
+		left = bin.StringWithPrecedence()
+	} else {
+		left = b.left.String()
+	}
+
+	if bin, ok := b.right.(BinaryNode); ok {
+		right = bin.StringWithPrecedence()
+	} else {
+		right = b.right.String()
+	}
+
 	return fmt.Sprintf("(%v %s %v)",
-		b.left, b.oper, b.right)
+		left, b.oper, right)
 }
 
 // '{' node* '}'

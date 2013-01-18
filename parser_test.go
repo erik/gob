@@ -225,5 +225,30 @@ func TestParseStatement(t *testing.T) {
 
 }
 
+// TODO: I'm only sort of sure about the correctness of these
 func TestParseOperatorPrecedence(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`
+a=b+c---d /* (a = (b + (c-- - d))) */
+a+2*--a=b=c /* ((a + (2 * --a)) = (b = c)) */
+`))
+
+	node, err := parser.parseExpression()
+	if err != nil {
+		t.Errorf("Operator parse: %v", err)
+	}
+
+	if str := (*node).(BinaryNode).StringWithPrecedence(); str !=
+		"(a = (b + (c-- - d)))" {
+		t.Errorf("Bad precedence: %s", str)
+	}
+
+	node, err = parser.parseExpression()
+	if err != nil {
+		t.Errorf("Operator parse: %v", err)
+	}
+
+	if str := (*node).(BinaryNode).StringWithPrecedence(); str !=
+		"((a + (2 * --a)) = (b = c))" {
+		t.Errorf("Bad precedence: %s", str)
+	}
 }
