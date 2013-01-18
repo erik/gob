@@ -42,9 +42,31 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
-func (p *Parser) Parse() (*Node, error) {
-	tok, _ := p.lex.NextToken()
-	return nil, NewParseError(tok, "Parser not implemented")
+func (p *Parser) Parse() (TranslationUnit, error) {
+	var node *Node = nil
+	var err error
+	var unit = TranslationUnit{file: p.lex.name}
+
+	for {
+		if _, ok := p.acceptType(tkEof); ok {
+			break
+		}
+
+		if node, err = p.parseTopLevel(); err != nil {
+			return unit, err
+		}
+
+		switch (*node).(type) {
+		case FunctionNode:
+			unit.funcs = append(unit.funcs, (*node).(FunctionNode))
+		case ExternVarInitNode:
+			unit.vars = append(unit.vars, (*node).(ExternVarInitNode))
+		default:
+			return unit, NewParseError(p.token(), "")
+		}
+	}
+
+	return unit, nil
 }
 
 func (p *Parser) accept(t TokenType, str string) (*Token, bool) {
@@ -550,11 +572,19 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 }
 
 // function declaration or external variable
-func (p *Parser) parseTopLevel() (*Node, error) {
-	if node, err := p.parseFuncDeclaration(); node != nil {
-		return node, err
-	} else if node, err := p.parseExternalVariableInit(); node != nil {
-		return node, err
+func (p *Parser) parseTopLevel() (node *Node, err error) {
+	pos := p.tokIdx
+
+	if node, err := p.parseFuncDeclaration(); err == nil {
+		return node, nil
+	} else if p.tokIdx != pos {
+		return nil, err
+	}
+
+	if node, err := p.parseExternalVariableInit(); node != nil {
+		return node, nil
+	} else if p.tokIdx != pos {
+		return nil, err
 	}
 
 	return nil, NewParseError(p.token(), "expected top level decl")
