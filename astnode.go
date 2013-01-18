@@ -54,6 +54,12 @@ func (b BinaryNode) String() string {
 		b.left, b.oper, b.right)
 }
 
+// Use parens to make precedence more apparent
+func (b BinaryNode) StringWithPrecedence() string {
+	return fmt.Sprintf("(%v %s %v)",
+		b.left, b.oper, b.right)
+}
+
 // '{' node* '}'
 type BlockNode struct {
 	nodes []Node

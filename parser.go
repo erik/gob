@@ -219,17 +219,38 @@ func (p *Parser) parseExpression() (*Node, error) {
 	}
 
 	if tok, ok := p.acceptType(tkOperator); ok {
-		bin := BinaryNode{left: *node, oper: tok.value}
 		rhs, err := p.parseExpression()
 		if err != nil {
 			return nil, err
 		}
 
-		bin.right = *rhs
+		var bin BinaryNode
+
+		// Resolve precedence for multiple operators in expression
+		// TODO: currently ignores LTR, RTL binding
+		if rbin, ok := (*rhs).(BinaryNode); ok {
+			lproc, _ := OperatorPrecedence(tok.value)
+			rproc, _ := OperatorPrecedence(rbin.oper)
+
+			if lproc > rproc {
+				left := BinaryNode{left: *node, oper: tok.value,
+					right: rbin.left}
+				bin = BinaryNode{left: left, oper: rbin.oper,
+					right: rbin.right}
+			} else {
+				bin = BinaryNode{left: *node, oper: tok.value,
+					right: rbin}
+			}
+
+		} else {
+			bin = BinaryNode{left: *node,
+				oper: tok.value, right: *rhs}
+		}
 
 		*node = bin
 		return node, nil
 	}
+
 	return node, nil
 }
 

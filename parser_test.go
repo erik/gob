@@ -224,3 +224,6 @@ func TestParseStatement(t *testing.T) {
 	}
 
 }
+
+func TestParseOperatorPrecedence(t *testing.T) {
+}

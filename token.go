@@ -4,6 +4,13 @@ import (
 	"text/scanner"
 )
 
+type OperatorBinding int
+
+const (
+	opRL OperatorBinding = iota // right to left binding
+	opLR                        // left to right binding
+)
+
 type TokenType int
 
 const (
@@ -82,4 +89,29 @@ func (t TokenType) String() string {
 
 func (t Token) String() string {
 	return t.kind.String() + ": " + t.value
+}
+
+func OperatorPrecedence(op string) (prec int, bind OperatorBinding) {
+	switch op {
+	case "*", "/", "%":
+		return 90, opLR
+	case "+", "-":
+		return 80, opLR
+	case ">", "<", "<=", ">=":
+		return 70, opLR
+	case "==", "!=":
+		return 60, opLR
+	case "&":
+		return 50, opLR
+	case "^":
+		return 40, opLR
+	case "|":
+		return 30, opLR
+	case "?":
+		return 20, opRL
+	case "=", "=+", "=-", "=/", "=*": // etc
+		return 10, opRL
+	}
+
+	return -1, -1
 }
