@@ -33,12 +33,6 @@ const (
 	ndWhile
 )
 
-type TranslationUnit struct {
-	file  string
-	funcs []FunctionNode
-	vars  []ExternVarInitNode
-}
-
 type Node interface {
 	Type() NodeType
 	String() string
