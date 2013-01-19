@@ -1,27 +1,28 @@
 package main
 
 import (
-	"flag"
 	"fmt"
 	"github.com/boredomist/gob/parse"
+	opt "github.com/droundy/goopt"
 	"os"
 )
 
 const GOB_VERSION = "0.0.0"
 
 var (
-	showVersion = flag.Bool("version", false, "Show version info")
+	showVersion = opt.Flag([]string{"-v", "--version"}, []string{},
+		"Show version info", "")
 	// TODO: other
 )
 
 func main() {
-	flag.Parse()
+	opt.Parse(nil)
 
 	if *showVersion {
 		fmt.Printf("Gob v%s\n", GOB_VERSION)
 	}
 
-	for _, name := range flag.Args() {
+	for _, name := range opt.Args {
 		file, err := os.Open(name)
 		if err != nil {
 			fmt.Println(err)
