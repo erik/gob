@@ -33,6 +33,11 @@ name to be too good to pass up.
 * Back end (code generator)
   * Not yet implemented
 
+## Links
+
+* http://cm.bell-labs.com/cm/cs/who/dmr/btut.html
+* http://cm.bell-labs.com/who/dmr/bref.html
+
 ## License
 
 Copyright (c) 2013 Erik Price

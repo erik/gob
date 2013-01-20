@@ -385,19 +385,19 @@ if (a + b < c) do_that(); else { do_this(); do_that(); }
 
 func TestParse(t *testing.T) {
 	parser := NewParser("my_file.b", strings.NewReader(`
-/* This is a translation unit */
-a 1; b 2; c 3;
+	/* This is a translation unit */
+	a 1; b 2; c 3;
 
-func1(a,b,c) {
-  return func(a + b + c);
-}
+	func1(a,b,c) {
+	  return func(a + b + c);
+	}
 
-func(w) {
-  auto x,y,z;
-  x = a; y = b; z = c;
-  return w/x+y*z;
-}
-`))
+	func(w) {
+	  auto x,y,z;
+	  x = a; y = b; z = c;
+	  return w/x+y*z;
+	}
+	`))
 
 	unit, err := parser.Parse()
 	if err != nil {
