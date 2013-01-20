@@ -29,6 +29,7 @@ const (
 	ndStatement
 	ndString
 	ndSwitch
+	ndTernary
 	ndUnary
 	ndVarDecl
 	ndWhile
@@ -266,6 +267,19 @@ func (s SwitchNode) String() string {
 	}
 
 	return str
+}
+
+// Yes, I know "ternary" is no more descriptive than binary op,
+// but there's only one.
+type TernaryNode struct {
+	cond      Node
+	trueBody  Node
+	falseBody Node
+}
+
+func (t TernaryNode) Type() NodeType { return ndTernary }
+func (t TernaryNode) String() string {
+	return fmt.Sprintf("%v ? %v : %v", t.cond, t.trueBody, t.falseBody)
 }
 
 type UnaryNode struct {
