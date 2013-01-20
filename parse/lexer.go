@@ -165,6 +165,9 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case ',':
 		tok.kind = tkComma
 
+	case '?':
+		tok.kind = tkTernary
+
 	case '\'':
 		tok.kind = tkCharacter
 		tok.value = ""

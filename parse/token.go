@@ -30,7 +30,8 @@ const (
 	tkColon
 	tkCharacter
 	tkKeyword
-	tkOperator // Composite type of all operators
+	tkTernary
+	tkOperator // Composite type of most operators
 )
 
 type Token struct {
@@ -84,6 +85,8 @@ func (t TokenType) String() string {
 		return "Keyword"
 	case tkOperator:
 		return "Operator"
+	case tkTernary:
+		return "Ternary"
 	}
 
 	return "UnknownType"
