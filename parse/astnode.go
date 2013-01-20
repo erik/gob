@@ -28,6 +28,7 @@ const (
 	ndReturn
 	ndStatement
 	ndString
+	ndSwitch
 	ndUnary
 	ndVarDecl
 	ndWhile
@@ -227,6 +228,45 @@ type StringNode struct {
 
 func (s StringNode) Type() NodeType { return ndString }
 func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
+
+type caseNode struct {
+	cond       Node
+	statements []Node
+}
+
+func (c caseNode) String() string {
+	str := fmt.Sprintf("case %v:", c.cond)
+
+	for _, stmt := range c.statements {
+		str += fmt.Sprintf("\n\t%v", stmt)
+	}
+
+	return str
+}
+
+type SwitchNode struct {
+	cond        Node
+	defaultCase []Node
+	cases       []caseNode
+}
+
+func (s SwitchNode) Type() NodeType { return ndSwitch }
+func (s SwitchNode) String() string {
+	str := fmt.Sprintf("switch(%v) {", s.cond)
+
+	for _, cs := range s.cases {
+		str += "\n" + cs.String()
+	}
+
+	if s.defaultCase != nil {
+		str += "\ndefault:"
+		for _, stmt := range s.defaultCase {
+			str += fmt.Sprintf("\n\t%v", stmt)
+		}
+	}
+
+	return str
+}
 
 type UnaryNode struct {
 	oper    string
