@@ -453,7 +453,7 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 	// Array access
 	if _, ok := p.acceptType(tkOpenBracket); ok {
 		array := *node
-		index, err := p.parsePrimary()
+		index, err := p.parseExpression()
 
 		if err != nil {
 			return nil, err

@@ -140,7 +140,7 @@ func TestParsePrimary(t *testing.T) {
 
 	parser = NewParser("name", strings.NewReader(`
 (func)(1,(ab(c)),3)
-((abb(2))[23])[ab(c(d[2]))]
+((abb(++a))[23])[ab(c(d[2]))]
 `))
 	if _, err := parser.parsePrimary(); err != nil {
 		t.Errorf("Complex func call: %v", err)
