@@ -240,7 +240,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 
 		}
 
-	case '%', '&':
+	case '%', '&', '~':
 		tok.kind = tkOperator
 
 	default:

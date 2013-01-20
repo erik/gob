@@ -152,12 +152,36 @@ func TestParsePrimary(t *testing.T) {
 
 }
 
+func TestParseUnary(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`
+*a, &a, -a, !a, ++a, --a, ~a, /* prefix ops */
+a++, a--,                     /* postfix ops */
+ `))
+
+	var ops = []string{
+		"*a", "&a", "-a", "!a", "++a", "--a", "~a",
+		"a++", "a--",
+	}
+
+	for _, op := range ops {
+		if node, err := parser.parseSubExpression(); err != nil {
+			t.Errorf("Expression unary: %v", err)
+		} else if (*node).String() != op {
+			t.Errorf("Expression unary: %v", *node)
+		}
+
+		if _, err := parser.expectType(tkComma); err != nil {
+			t.Errorf("Error %v", err)
+		}
+
+	}
+}
+
 func TestParseExpression(t *testing.T) {
 	parser := NewParser("", strings.NewReader(`
 -(!b[2]--)++
 a=b+++-(--c)*4
 `))
-
 	if _, err := parser.parseExpression(); err != nil {
 		t.Errorf("Expression unary: %v", err)
 	}
