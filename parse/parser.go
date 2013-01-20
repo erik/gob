@@ -42,10 +42,24 @@ func NewParser(name string, input io.Reader) *Parser {
 	return parse
 }
 
-func (p *Parser) Parse() (TranslationUnit, error) {
+func (p *Parser) Parse() (unit TranslationUnit, err error) {
 	var node *Node = nil
-	var err error
-	var unit = TranslationUnit{file: p.lex.name}
+	unit = TranslationUnit{file: p.lex.name}
+
+	// Bail out of lex errors
+	// TODO: this is sort of convoluted logic, refactor
+	defer func() {
+		if e := recover(); e != nil {
+			// if it's a lex error, trap, return
+			if lexErr, ok := e.(*LexError); ok {
+				println("here")
+				unit, err = TranslationUnit{}, lexErr
+			} else {
+				// rethrow
+				panic(e)
+			}
+		}
+	}()
 
 	for {
 		if _, ok := p.acceptType(tkEof); ok {
