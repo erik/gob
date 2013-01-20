@@ -528,6 +528,12 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		return node, nil
 	}
 
+	if node, err := p.parseSwitch(); err != nil && p.tokIdx != pos {
+		return nil, err
+	} else if err == nil {
+		return node, nil
+	}
+
 	if _, ok := p.acceptType(tkSemicolon); ok {
 		var null Node = NullNode{}
 		return &null, nil
