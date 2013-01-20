@@ -389,3 +389,19 @@ func(w) {
 	}
 
 }
+
+func TestParseSwitch(t *testing.T) {
+	parser := NewParser("", strings.NewReader(`
+switch(1+1) {
+  case 2: do_this(); break;
+  case 3: do_that();
+  default: do_this_and_that(); break;
+}
+`))
+
+	if _, err := parser.parseSwitch(); err != nil {
+		t.Errorf("Switch statement: %v", err)
+	}
+
+	// TODO: actually test this
+}

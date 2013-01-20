@@ -17,16 +17,17 @@ type Lexer struct {
 }
 
 var keywords = map[string]bool{
-	"auto":   true,
-	"break":  true,
-	"case":   true,
-	"else":   true,
-	"extrn":  true,
-	"goto":   true,
-	"if":     true,
-	"return": true,
-	"switch": true,
-	"while":  true,
+	"auto":    true,
+	"break":   true,
+	"case":    true,
+	"default": true,
+	"else":    true,
+	"extrn":   true,
+	"goto":    true,
+	"if":      true,
+	"return":  true,
+	"switch":  true,
+	"while":   true,
 }
 
 type LexError struct {

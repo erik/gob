@@ -604,6 +604,113 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 	return nil, NewParseError(p.tokenAt(pos), "expected statement")
 }
 
+// TODO: this logic is all over the place. refactor.
+func (p *Parser) parseSwitch() (*Node, error) {
+	var switchNode SwitchNode
+
+	if _, err := p.expect(tkKeyword, "switch"); err != nil {
+		return nil, err
+	}
+
+	if _, err := p.expectType(tkOpenParen); err != nil {
+		return nil, err
+	}
+
+	if cond, err := p.parseExpression(); err != nil {
+		return nil, err
+	} else {
+		switchNode.cond = *cond
+	}
+
+	if _, err := p.expectType(tkCloseParen); err != nil {
+		return nil, err
+	}
+
+	// I know, it can technically be any statement, but I'll leave it
+	// as a block for now.
+	if _, err := p.expectType(tkOpenBrace); err != nil {
+		return nil, err
+	}
+
+	for {
+		if _, ok := p.acceptType(tkCloseBrace); ok {
+			break
+		}
+
+		if _, ok := p.accept(tkKeyword, "case"); ok {
+			var c caseNode
+
+			if cond, err := p.parseConstant(); err != nil {
+				return nil, err
+			} else {
+				c = caseNode{cond: *cond}
+			}
+
+			if _, err := p.expectType(tkColon); err != nil {
+				return nil, err
+			}
+
+			for {
+				if _, ok := p.accept(tkKeyword, "case"); ok {
+					p.tokIdx -= 1
+					break
+				} else if _, ok := p.accept(tkKeyword, "default"); ok {
+					p.tokIdx -= 1
+					break
+				} else if _, ok := p.acceptType(tkCloseBrace); ok {
+					p.tokIdx -= 1
+					break
+				}
+
+				if stmt, err := p.parseStatement(); err != nil {
+					return nil, err
+				} else {
+					c.statements = append(c.statements, *stmt)
+				}
+			}
+
+			switchNode.cases = append(switchNode.cases, c)
+
+		} else if _, ok := p.accept(tkKeyword, "default"); ok {
+			if _, err := p.expectType(tkColon); err != nil {
+				return nil, err
+			}
+
+			if switchNode.defaultCase != nil {
+				return nil, NewParseError(p.token(),
+					"Multiple 'default' cases")
+			}
+
+			for {
+				if _, ok := p.accept(tkKeyword, "case"); ok {
+					p.tokIdx -= 1
+					break
+				} else if _, ok := p.accept(tkKeyword, "default"); ok {
+					p.tokIdx -= 1
+					break
+				} else if _, ok := p.acceptType(tkCloseBrace); ok {
+					p.tokIdx -= 1
+					break
+				}
+
+				if stmt, err := p.parseStatement(); err != nil {
+					return nil, err
+				} else {
+					switchNode.defaultCase =
+						append(switchNode.defaultCase, *stmt)
+				}
+			}
+
+		} else {
+			return nil, NewParseError(p.token(),
+				"expected 'case' or 'default'")
+		}
+	}
+
+	var node Node = switchNode
+	return &node, nil
+}
+
 // function declaration or external variable
 func (p *Parser) parseTopLevel() (node *Node, err error) {
 	pos := p.tokIdx
