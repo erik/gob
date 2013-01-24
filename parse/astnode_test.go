@@ -5,6 +5,7 @@ import (
 	"testing"
 )
 
+// TODO: this is an incomplete set of tests
 var nodefmt = []struct {
 	node Node
 	str  string

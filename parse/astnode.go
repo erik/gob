@@ -279,7 +279,7 @@ type TernaryNode struct {
 
 func (t TernaryNode) Type() NodeType { return ndTernary }
 func (t TernaryNode) String() string {
-	return fmt.Sprintf("%v ? %v : %v", t.cond, t.trueBody, t.falseBody)
+	return fmt.Sprintf("(%v ? %v : %v)", t.cond, t.trueBody, t.falseBody)
 }
 
 type UnaryNode struct {

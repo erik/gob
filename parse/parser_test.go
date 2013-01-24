@@ -179,16 +179,31 @@ a++, a--,                     /* postfix ops */
 
 func TestParseExpression(t *testing.T) {
 	parser := NewParser("", strings.NewReader(`
--(!b[2]--)++
-a=b+++-(--c)*4
+a+b ? a : b;
+-(!b[2]--)++;
+a=b+++-(--c)*4;
+
 `))
+	if _, err := parser.parseStatement(); err != nil {
+		t.Errorf("Ternary: %v", err)
+	}
+
 	if _, err := parser.parseExpression(); err != nil {
 		t.Errorf("Expression unary: %v", err)
+	}
+
+	if _, err := parser.expectType(tkSemicolon); err != nil {
+		t.Errorf("parse: %v", err)
 	}
 
 	if _, err := parser.parseExpression(); err != nil {
 		t.Errorf("Complex expression: %v", err)
 	}
+
+	if _, err := parser.expectType(tkSemicolon); err != nil {
+		t.Errorf("parse: %v", err)
+	}
+
 }
 
 func TestParseSubExpression(t *testing.T) {

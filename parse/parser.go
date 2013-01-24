@@ -52,7 +52,6 @@ func (p *Parser) Parse() (unit TranslationUnit, err error) {
 		if e := recover(); e != nil {
 			// if it's a lex error, trap, return
 			if lexErr, ok := e.(*LexError); ok {
-				println("here")
 				unit, err = TranslationUnit{}, lexErr
 			} else {
 				// rethrow
@@ -233,10 +232,9 @@ func (p *Parser) parseSubExpression() (*Node, error) {
 		*expr = unNode
 	}
 
-	// Unary postfix operator
 	if p.token().kind == tkOperator {
 		switch p.token().value {
-		case "++", "--":
+		case "++", "--": // Unary postfix operator
 			unNode = UnaryNode{oper: p.token().value,
 				node: *expr, postfix: true}
 			*expr = unNode
@@ -284,7 +282,29 @@ func (p *Parser) parseExpression() (*Node, error) {
 		}
 
 		*node = bin
-		return node, nil
+	}
+
+	// Ternary operator
+	if _, ok := p.acceptType(tkTernary); ok {
+		ter := TernaryNode{cond: *node}
+
+		if body, err := p.parseExpression(); err != nil {
+			return nil, err
+		} else {
+			ter.trueBody = *body
+		}
+
+		if _, err := p.expectType(tkColon); err != nil {
+			return nil, err
+		}
+
+		if body, err := p.parseExpression(); err != nil {
+			return nil, err
+		} else {
+			ter.falseBody = *body
+		}
+
+		*node = ter
 	}
 
 	return node, nil
