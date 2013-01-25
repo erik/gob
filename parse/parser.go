@@ -780,8 +780,32 @@ func (p *Parser) parseVarDecl() (*Node, error) {
 
 	varNode := VarDeclNode{}
 
-	if varNode.vars, err = p.parseVariableList(); err != nil {
-		return nil, err
+	for {
+		ident, err := p.expectType(tkIdent)
+		if err != nil {
+			return nil, err
+		}
+
+		if _, ok := p.acceptType(tkOpenBracket); ok {
+
+			if num, err := p.expectType(tkNumber); err != nil {
+				return nil, err
+			} else {
+				varNode.vars = append(varNode.vars,
+					VarDecl{ident.value, true, num.value})
+			}
+
+			if _, err := p.expectType(tkCloseBracket); err != nil {
+				return nil, err
+			}
+		} else {
+			varNode.vars = append(varNode.vars,
+				VarDecl{ident.value, false, ""})
+		}
+
+		if _, ok := p.acceptType(tkComma); !ok {
+			break
+		}
 	}
 
 	if _, err = p.expectType(tkSemicolon); err != nil {

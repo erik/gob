@@ -296,13 +296,33 @@ func (u UnaryNode) String() string {
 	return fmt.Sprintf("%s%v", u.oper, u.node)
 }
 
+type VarDecl struct {
+	name    string
+	vecDecl bool
+	size    string
+}
+
 type VarDeclNode struct {
-	vars []string
+	vars []VarDecl
 }
 
 func (v VarDeclNode) Type() NodeType { return ndVarDecl }
 func (v VarDeclNode) String() string {
-	return fmt.Sprintf("auto %s;", strings.Join(v.vars, ", "))
+	decls := make([]string, 0, len(v.vars))
+
+	for _, decl := range v.vars {
+		var str string
+
+		if decl.vecDecl {
+			str = fmt.Sprintf("%s[%s]", decl.name, decl.size)
+		} else {
+			str = decl.name
+		}
+
+		decls = append(decls, str)
+	}
+
+	return fmt.Sprintf("auto %s;", strings.Join(decls, ", "))
 }
 
 type WhileNode struct {

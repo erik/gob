@@ -70,7 +70,10 @@ var nodefmt = []struct {
 	{UnaryNode{"++", IntegerNode{"1"}, true}, "1++"},
 
 	// VarDeclNode
-	{VarDeclNode{[]string{"a", "b", "c"}}, "auto a, b, c;"},
+	{VarDeclNode{[]VarDecl{{"a", false, ""},
+		{"b", true, "12"},
+		{"c", false, ""}}},
+		"auto a, b[12], c;"},
 
 	// WhileNode
 	{WhileNode{BinaryNode{IdentNode{"a"}, ">", IdentNode{"b"}},
