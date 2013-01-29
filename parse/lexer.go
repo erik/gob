@@ -4,6 +4,7 @@ import (
 	"container/list"
 	"fmt"
 	"io"
+	"strings"
 	"text/scanner"
 	"unicode"
 )
@@ -112,13 +113,6 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	case scanner.EOF:
 		tok.kind = tkEof
 
-	case scanner.Ident:
-		if keywords[tok.value] {
-			tok.kind = tkKeyword
-		} else {
-			tok.kind = tkIdent
-		}
-
 	case scanner.Int:
 		tok.kind = tkNumber
 		// TODO: this isn't all inclusive
@@ -137,6 +131,26 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 		tok.kind = tkString
 		// cut out leading/trailing "
 		tok.value = tok.value[1 : len(tok.value)-1]
+
+	case scanner.Ident:
+		// Variable names have one to eight ascii characters,
+		// chosen from A-Z, a-z, ., _, 0-9, and start with a
+		// non-digit.
+		//
+		// Will be ignoring "1 to 8" characters limit.
+		r := lex.scanner.Peek()
+		for strings.ContainsRune("_.", r) || unicode.IsLetter(r) || unicode.IsDigit(r) {
+
+			tok.value += string(lex.scanner.Next())
+
+			r = lex.scanner.Peek()
+		}
+
+		if keywords[tok.value] {
+			tok.kind = tkKeyword
+		} else {
+			tok.kind = tkIdent
+		}
 
 	case '{':
 		tok.kind = tkOpenBrace
@@ -249,6 +263,7 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	default:
 		return tok.Error(), NewLexError(lex.scanner.Pos(),
 			fmt.Sprintf("unexpected character: %c", scan))
+
 	}
 
 	tok.end = lex.scanner.Pos()

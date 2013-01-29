@@ -48,6 +48,7 @@ func TestBasicLex(t *testing.T) {
 	in := strings.NewReader(`
 123 "a string with spaces"
 an_identifier_1 auto auto_
+other_ident.123__
 'char' 'ch' ''`)
 
 	lex := NewLexer("file", in)
@@ -75,6 +76,11 @@ an_identifier_1 auto auto_
 	tok, err = lex.NextToken()
 	if err != nil || tok.kind != tkIdent || tok.value != "auto_" {
 		t.Errorf("Not keyword: %v, %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err != nil || tok.kind != tkIdent || tok.value != "other_ident.123__" {
+		t.Errorf("Punctatuated ident: %v, %v", tok, err)
 	}
 
 	tok, err = lex.NextToken()
