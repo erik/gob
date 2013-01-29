@@ -1,3 +1,4 @@
 language: go
+script: go get -d -v ./... && go build -v ./... && go test -v ./...
 notifications:
   email: false
