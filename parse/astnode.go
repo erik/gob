@@ -16,6 +16,7 @@ const (
 	ndCharacter
 	ndExtVarDecl
 	ndExtVarInit
+	ndExtVecInit
 	ndFunction
 	ndFunctionCall
 	ndGoto
@@ -129,6 +130,25 @@ type ExternVarInitNode struct {
 func (e ExternVarInitNode) Type() NodeType { return ndExtVarInit }
 func (e ExternVarInitNode) String() string {
 	return fmt.Sprintf("%s %v;", e.name, e.value)
+}
+
+// name '[' size ']' value+ ';'
+type ExternVecInitNode struct {
+	name   string
+	size   string
+	values []Node
+}
+
+func (e ExternVecInitNode) Type() NodeType { return ndExtVecInit }
+func (e ExternVecInitNode) String() string {
+	vals := make([]string, 0, len(e.values))
+
+	for i, val := range e.values {
+		vals[i] = val.String()
+	}
+
+	return fmt.Sprintf("%s [%s] %v;", e.name, e.size,
+		strings.Join(vals, ", "))
 }
 
 // name '(' (var (',' var)*) ? ')' block

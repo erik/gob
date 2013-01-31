@@ -72,10 +72,11 @@ func (p *Parser) Parse() (unit TranslationUnit, err error) {
 		switch (*node).(type) {
 		case FunctionNode:
 			unit.funcs = append(unit.funcs, (*node).(FunctionNode))
-		case ExternVarInitNode:
-			unit.vars = append(unit.vars, (*node).(ExternVarInitNode))
+		case ExternVarInitNode, ExternVecInitNode:
+			unit.vars = append(unit.vars, *node)
 		default:
-			return unit, NewParseError(p.token(), "")
+			return unit, NewParseError(p.token(),
+				"That's not a top level decl")
 		}
 	}
 
@@ -329,7 +330,8 @@ func (p *Parser) parseExternVarDecl() (*Node, error) {
 
 	if len(varNode.names) <= 0 {
 		return nil, NewParseError(p.token(),
-			"expected at least 1 variable in extrn declaration")
+			"expected at least 1 variable in extrn"+
+				" declaration")
 	}
 
 	var node Node = varNode
@@ -345,28 +347,63 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		return nil, err
 	}
 
-	retNode := ExternVarInitNode{name: ident.value}
+	if _, ok := p.acceptType(tkOpenBracket); ok {
+		init := ExternVecInitNode{name: ident.value}
 
-	constant, err := p.parseConstant()
-	if err != nil {
-		if _, err = p.expectType(tkSemicolon); err == nil {
-			// Empty declarations are zero filled
-			retNode.value = IntegerNode{"0"}
-			var node Node = retNode
-			return &node, err
+		size, err := p.expectType(tkNumber)
+		if err != nil {
+			return nil, err
 		}
+		if _, err := p.expectType(tkCloseBracket); err != nil {
+			return nil, err
+		}
+
+		init.size = size.value
+
+		for {
+			if constant, err := p.parseConstant(); err != nil {
+				return nil, err
+			} else {
+				init.values = append(init.values, *constant)
+			}
+
+			if _, ok := p.acceptType(tkComma); !ok {
+				break
+			}
+		}
+
+		var node Node = init
+		if _, err = p.expectType(tkSemicolon); err != nil {
+			return nil, err
+		}
+		return &node, nil
 	} else {
-		retNode.value = *constant
+		init := ExternVarInitNode{name: ident.value}
+
+		constant, err := p.parseConstant()
+		if err != nil {
+			if _, err = p.expectType(tkSemicolon); err == nil {
+				// Empty declarations are zero filled
+				init.value = IntegerNode{"0"}
+				var node Node = init
+				return &node, nil
+			}
+		} else {
+			init.value = *constant
+		}
+
+		if err != nil {
+			return nil, err
+		}
+
+		var node Node = init
+		if _, err = p.expectType(tkSemicolon); err != nil {
+			return nil, err
+		}
+		return &node, nil
 	}
 
-	if err != nil {
-		return nil, err
-	}
-
-	_, err = p.expectType(tkSemicolon)
-
-	var node Node = retNode
-	return &node, err
+	panic("It's happening")
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {
@@ -755,11 +792,16 @@ func (p *Parser) parseSwitch() (*Node, error) {
 func (p *Parser) parseTopLevel() (node *Node, err error) {
 	pos := p.tokIdx
 
+	// FIXME: this is pretty convoluted logic.
+
 	if node, err := p.parseExternalVariableInit(); err == nil {
 		return node, nil
-	} else if p.tokIdx != pos {
-		// Rewind to previous position (XXX: might hide errors)
+	} else if p.tokIdx == pos+1 {
+		// Rewind to previous position if only ident is encountered
 		p.tokIdx = pos
+	} else {
+		// Otherwise, it's an actual syntax error
+		return nil, err
 	}
 
 	if node, err := p.parseFuncDeclaration(); err == nil {

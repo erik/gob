@@ -21,7 +21,7 @@ func NewSemanticError(node Node, msg string) error {
 type TranslationUnit struct {
 	file  string
 	funcs []FunctionNode
-	vars  []ExternVarInitNode
+	vars  []Node
 }
 
 func (t TranslationUnit) Verify() error {

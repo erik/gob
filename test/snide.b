@@ -13,4 +13,4 @@ snide(errno) {
    }
 
 mess [5] "too bad", "tough luck", "sorry, Charlie", "that's the breaks",
-       "what a shame", "some days you can't win";
+  "what a shame", "some days you can't win";
