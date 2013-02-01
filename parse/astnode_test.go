@@ -59,6 +59,11 @@ var nodefmt = []struct {
 	// ExternVarInitNode
 	{ExternVarInitNode{"var", IntegerNode{"2"}}, "var 2;"},
 
+	// ExternVecInitNode
+	{ExternVecInitNode{"var", "2", []Node{IntegerNode{"2"}}}, "var [2] 2;"},
+	{ExternVecInitNode{"var", "2", []Node{IntegerNode{"2"}, IntegerNode{"3"}}},
+		"var [2] 2, 3;"},
+
 	// ExternVarDeclNode
 	{ExternVarDeclNode{[]string{"a", "b", "c"}}, "extrn a, b, c;"},
 

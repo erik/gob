@@ -54,6 +54,7 @@ func TestParserExternalVarInit(t *testing.T) {
 varname 123;
 varname 'abcd';
 zero ;
+varname [1] 123, '245', "abc";
 `))
 
 	node, err := parser.parseExternalVariableInit()
@@ -69,6 +70,11 @@ zero ;
 	node, err = parser.parseExternalVariableInit()
 	if node == nil || err != nil {
 		t.Errorf("Ext var empty: %v", err)
+	}
+
+	node, err = parser.parseExternalVariableInit()
+	if node == nil || err != nil {
+		t.Errorf("Ext vec mixed types: %v", err)
 	}
 }
 

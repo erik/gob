@@ -141,13 +141,13 @@ type ExternVecInitNode struct {
 
 func (e ExternVecInitNode) Type() NodeType { return ndExtVecInit }
 func (e ExternVecInitNode) String() string {
-	vals := make([]string, 0, len(e.values))
+	vals := make([]string, len(e.values), len(e.values))
 
 	for i, val := range e.values {
 		vals[i] = val.String()
 	}
 
-	return fmt.Sprintf("%s [%s] %v;", e.name, e.size,
+	return fmt.Sprintf("%s [%s] %s;", e.name, e.size,
 		strings.Join(vals, ", "))
 }
 
