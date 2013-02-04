@@ -5,4 +5,5 @@ import (
 )
 
 // TODO: write these
-func TestVerifyDummy(_ *testing.T) {}
+func TestVerifyDummy(_ *testing.T) {
+}
