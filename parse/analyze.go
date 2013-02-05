@@ -25,7 +25,46 @@ type TranslationUnit struct {
 }
 
 func (t TranslationUnit) Verify() error {
-	return errors.New("Verification not implemented")
+
+	for _, fn := range t.funcs {
+		// TODO: ...
+		if err := t.VerifyAssignments(fn); err != nil {
+			return err
+		}
+
+		if err := t.ResolveExternalDeclarations(fn); err != nil {
+			return err
+		}
+	}
+
+	return errors.New("Verification not fully implemented")
+}
+
+func (t TranslationUnit) expectLHS(node Node) error {
+	return errors.New("expectLHS not implemented")
+}
+
+func (t TranslationUnit) expectRHS(node Node) error {
+	return errors.New("expectRHS not implemented")
+}
+
+// Verify that all assignments have a proper LHS and RHS
+func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
+	if bin, ok := fn.body.(BinaryNode); ok {
+		if bin.oper == "=" {
+			if err := t.expectLHS(bin.left); err != nil {
+				return err
+			}
+			if err := t.expectRHS(bin.right); err != nil {
+				return err
+			}
+		}
+
+	} else if stmt, ok := fn.body.(StatementNode); ok {
+		_ = stmt
+	}
+
+	return nil
 }
 
 // TODO: resolve auto variable declarations within function definitions
@@ -62,7 +101,7 @@ func (t TranslationUnit) ResolveDuplicates() error {
 	return nil
 }
 
-func (t TranslationUnit) ResolveExternalDeclarations() error {
+func (t TranslationUnit) ResolveExternalDeclarations(fn FunctionNode) error {
 	// TODO: This should check that all declared extern vars resolve
 	return errors.New("Not yet implemented")
 }
