@@ -1,7 +1,7 @@
 package test
 
 import (
-	"github.com/boredomist/gob/parse"
+	"github.com/erik/gob/parse"
 	"os"
 	"testing"
 )

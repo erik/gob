@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/boredomist/gob/parse"
+	"github.com/erik/gob/parse"
 	opt "github.com/droundy/goopt"
 	"os"
 )

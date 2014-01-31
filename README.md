@@ -1,12 +1,12 @@
 # gob
-[![Build Status](https://travis-ci.org/boredomist/gob.png?branch=master)](https://travis-ci.org/boredomist/gob)
+[![Build Status](https://travis-ci.org/erik/gob.png?branch=master)](https://travis-ci.org/erik/gob)
 
 Gob is an implementation of the B language, written in Go.
 
 Currently the project is in its infancy and exists only as a
 collection of unit tests. Run `go test ./...` to check for sanity.
 
-`go build .` (or `go get github.com/boredomist/gob`) will give you an
+`go build .` (or `go get github.com/erik/gob`) will give you an
 executable that parses files passed on the command line, and not much
 else.
 
