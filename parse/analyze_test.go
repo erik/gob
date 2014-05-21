@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"github.com/stretchr/testify/assert"
 	"strings"
 	"testing"
 )
@@ -41,11 +40,15 @@ func TestLHS(t *testing.T) {
 	var unit TranslationUnit
 
 	// Simple lhs cases
-	assert.Nil(t, unit.expectLHS(IdentNode{"foo"}), "ident node LHS")
-	assert.Nil(t, unit.expectLHS(ArrayAccessNode{IdentNode{"abc"},
-		IntegerNode{"2"}}), "array access lhs")
-	assert.Nil(t, unit.expectLHS(UnaryNode{"*", IntegerNode{"1"}, false}),
-		"unary node lhs")
+	if err := unit.expectLHS(IdentNode{"foo"}); err != nil {
+		t.Errorf("ident node LHS")
+	}
+	if err := unit.expectLHS(ArrayAccessNode{IdentNode{"abc"}, IntegerNode{"2"}}); err != nil {
+		t.Errorf("array access lhs")
+	}
+	if err := unit.expectLHS(UnaryNode{"*", IntegerNode{"1"}, false}); err != nil {
+		t.Errorf("unary node lhs")
+	}
 }
 
 func TestRHS(t *testing.T) {
