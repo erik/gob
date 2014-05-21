@@ -204,8 +204,6 @@ func (p *Parser) parseConstant() (*Node, error) {
 	default:
 		return nil, err
 	}
-
-	return nil, NewParseError(p.token(), "The impossible happened")
 }
 
 func (p *Parser) parseSubExpression() (*Node, error) {
@@ -402,8 +400,6 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		}
 		return &node, nil
 	}
-
-	panic("It's happening")
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {

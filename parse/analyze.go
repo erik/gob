@@ -27,8 +27,16 @@ type TranslationUnit struct {
 func (t TranslationUnit) Verify() error {
 
 	for _, fn := range t.funcs {
+		if err := t.expectStatement(fn.body); err != nil {
+			return err
+		}
+
 		// TODO: ...
 		if err := t.VerifyAssignments(fn); err != nil {
+			return err
+		}
+
+		if err := t.ResolveDuplicates(); err != nil {
 			return err
 		}
 
@@ -41,11 +49,37 @@ func (t TranslationUnit) Verify() error {
 }
 
 func (t TranslationUnit) expectLHS(node Node) error {
-	return errors.New("expectLHS not implemented")
+	switch node.(type) {
+	case ArrayAccessNode, IdentNode:
+		return nil
+	case UnaryNode:
+		if node.(UnaryNode).oper == "*" {
+			return nil
+		}
+	}
+
+	return NewSemanticError(node, "expected lvalue")
 }
 
 func (t TranslationUnit) expectRHS(node Node) error {
-	return errors.New("expectRHS not implemented")
+	if IsExpr(node) {
+		return nil
+	}
+
+	return NewSemanticError(node, "expected rvalue")
+}
+
+
+func (t TranslationUnit) expectStatement(node Node) error {
+	if IsStatement(node) {
+		return nil
+	}
+
+	return NewSemanticError(node, "expected statement")
+}
+
+func (t TranslationUnit) VerifyFunction(fn FunctionNode) error {
+	return nil
 }
 
 // Verify that all assignments have a proper LHS and RHS

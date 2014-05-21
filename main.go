@@ -2,8 +2,8 @@ package main
 
 import (
 	"fmt"
-	"github.com/erik/gob/parse"
 	opt "github.com/droundy/goopt"
+	"github.com/erik/gob/parse"
 	"os"
 )
 
@@ -36,6 +36,10 @@ func main() {
 			fmt.Println(err)
 		} else {
 			fmt.Println(unit)
+		}
+
+		if err = unit.Verify(); err != nil {
+			fmt.Println(err)
 		}
 	}
 
