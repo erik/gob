@@ -1,10 +1,10 @@
 package test
 
 import (
+	"fmt"
 	"github.com/erik/gob/parse"
 	"os"
 	"testing"
-	"fmt"
 )
 
 var tests = []string{"convert.b", "copy.b", "lower.b", "snide.b"}

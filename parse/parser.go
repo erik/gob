@@ -204,6 +204,8 @@ func (p *Parser) parseConstant() (*Node, error) {
 	default:
 		return nil, err
 	}
+
+	return nil, nil
 }
 
 func (p *Parser) parseSubExpression() (*Node, error) {
@@ -400,6 +402,8 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		}
 		return &node, nil
 	}
+
+	return nil, nil
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {

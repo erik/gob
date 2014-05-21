@@ -258,11 +258,10 @@ func (t TranslationUnit) ResolveDuplicates() error {
 	return nil
 }
 
-
 // Make sure all goto jump to valid places
 func (t TranslationUnit) ResolveLabels(fn FunctionNode) error {
 	labels := map[string]bool{}
-	gotos  := []GotoNode{}
+	gotos := []GotoNode{}
 
 	visiter := func(node Node) error {
 		switch node.(type) {
