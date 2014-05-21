@@ -24,9 +24,10 @@ func IsStatement(n Node) bool {
 	}
 
 	switch n.(type) {
-	case BlockNode, BreakNode, ExternVarDeclNode, ExternVarInitNode,
-		ExternVecInitNode, FunctionNode, GotoNode, IfNode, LabelNode,
-		ReturnNode, StatementNode, SwitchNode, VarDeclNode, WhileNode:
+	case BlockNode, BreakNode, CaseNode, ExternVarDeclNode,
+		ExternVarInitNode, ExternVecInitNode, FunctionNode, GotoNode,
+		IfNode, LabelNode, NullNode, ReturnNode, StatementNode, SwitchNode,
+		VarDeclNode, WhileNode:
 		return true
 	}
 
@@ -222,16 +223,16 @@ type StringNode struct {
 
 func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
 
-type caseNode struct {
+type CaseNode struct {
 	cond       Node
 	statements []Node
 }
 
-func (c caseNode) String() string {
-	str := fmt.Sprintf("case %v:", c.cond)
+func (c CaseNode) String() string {
+	str := fmt.Sprintf("\tcase %v:", c.cond)
 
 	for _, stmt := range c.statements {
-		str += fmt.Sprintf("\n\t%v", stmt)
+		str += fmt.Sprintf("\n\t\t%v", stmt)
 	}
 
 	return str
@@ -240,7 +241,7 @@ func (c caseNode) String() string {
 type SwitchNode struct {
 	cond        Node
 	defaultCase []Node
-	cases       []caseNode
+	cases       []CaseNode
 }
 
 func (s SwitchNode) String() string {

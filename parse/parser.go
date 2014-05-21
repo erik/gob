@@ -711,12 +711,12 @@ func (p *Parser) parseSwitch() (*Node, error) {
 		}
 
 		if _, ok := p.accept(tkKeyword, "case"); ok {
-			var c caseNode
+			var c CaseNode
 
 			if cond, err := p.parseConstant(); err != nil {
 				return nil, err
 			} else {
-				c = caseNode{cond: *cond}
+				c = CaseNode{cond: *cond}
 			}
 
 			if _, err := p.expectType(tkColon); err != nil {

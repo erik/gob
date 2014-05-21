@@ -9,12 +9,12 @@ convert(s,v) {
 
   auto m,i,j,c,sign;
 
-  i = O; /* vector index '/
-            j =-1; /* character index */
+  i = 0; /* vector index */
+  j =-1; /* character index */
 
 init: /* initialize to convert an integer */
-  m = 0; /* the integer value '/
-            sign = 0; /* sign = 1 if the integer is negative */
+  m = 0; /* the integer value */
+  sign = 0; /* sign = 1 if the integer is negative */
 
 loop: /* convert an integer */
 
