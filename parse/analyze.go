@@ -164,7 +164,6 @@ func (t TranslationUnit) visitExpressions(node Node, visit func(Node) error) err
 		}
 	}
 
-
 	return nil
 }
 
@@ -271,7 +270,9 @@ func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
 	visit := func(node Node) error {
 		stmt, ok := node.(StatementNode)
 
-		if !ok { return nil }
+		if !ok {
+			return nil
+		}
 		if bin, ok := stmt.expr.(BinaryNode); ok {
 			if bin.oper == "=" {
 				if err := t.expectLHS(bin.left); err != nil {
