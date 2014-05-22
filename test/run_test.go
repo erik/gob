@@ -1,7 +1,6 @@
 package test
 
 import (
-	"fmt"
 	"github.com/erik/gob/parse"
 	"os"
 	"testing"
@@ -22,9 +21,8 @@ func TestExamples(t *testing.T) {
 				t.Errorf("%s failed to parse: %v", test, err)
 			}
 
-			// Don't want the tests to fail just yet, not ready
 			if err = unit.Verify(); err != nil {
-				fmt.Printf("%s failed to verify: %v\n", test, err)
+				t.Errorf("%s failed to verify: %v\n", test, err)
 			}
 
 		}

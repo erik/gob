@@ -56,6 +56,15 @@ func TestRHS(t *testing.T) {
 }
 
 func TestVerifyAssignments(t *testing.T) {
-	//var unit TranslationUnit
+	unit, err := NewParser("", strings.NewReader(`
+good() { a = 1; a = 1 + 2; a = (1 + (a = 2)); a = a; a[0] = 1; a[1+2+a] = a;}
+bad() { 1 = a; 'this' = 'that';}`)).Parse()
 
+	if err != nil {
+		t.Errorf("Parse failed: %v", err)
+	} else if err = unit.VerifyAssignments(unit.funcs[0]); err != nil {
+		t.Errorf("verify good assignments failed: %v", err)
+	} else if err = unit.VerifyAssignments(unit.funcs[1]); err == nil {
+		t.Errorf("verify bad assignements passed", err)
+	}
 }

@@ -1,7 +1,6 @@
 package parse
 
 import (
-	"errors"
 	"fmt"
 	"reflect"
 )
@@ -43,22 +42,17 @@ func (t TranslationUnit) String() string {
 
 func (t TranslationUnit) Verify() error {
 
+	if err := t.ResolveDuplicates(); err != nil {
+		return err
+	}
+
 	for _, fn := range t.funcs {
 
 		if err := t.VerifyFunction(fn); err != nil {
 			return err
 		}
 
-		if err := t.expectStatement(fn.body); err != nil {
-			return err
-		}
-
-		// TODO: ...
 		if err := t.VerifyAssignments(fn); err != nil {
-			return err
-		}
-
-		if err := t.ResolveDuplicates(); err != nil {
 			return err
 		}
 
@@ -67,7 +61,7 @@ func (t TranslationUnit) Verify() error {
 		}
 	}
 
-	return errors.New("Verification not fully implemented")
+	return nil
 }
 
 func (t TranslationUnit) expectLHS(node Node) error {
@@ -103,6 +97,73 @@ func (t TranslationUnit) expectNodeType(node Node, kind reflect.Type) error {
 	if reflect.TypeOf(node) != kind {
 		return NewSemanticError(node, "expected "+kind.Name())
 	}
+
+	return nil
+}
+
+func (t TranslationUnit) visitExpressions(node Node, visit func(Node) error) error {
+	if IsExpr(node) {
+		return visit(node)
+	}
+
+	switch node.(type) {
+	case BlockNode:
+		for _, n := range node.(BlockNode).nodes {
+			if err := t.visitExpressions(n, visit); err != nil {
+				return err
+			}
+		}
+	case FunctionNode:
+		if err := t.visitExpressions(node.(FunctionNode).body, visit); err != nil {
+			return err
+		}
+
+	case IfNode:
+		if err := visit(node.(IfNode).cond); err != nil {
+			return err
+		}
+
+		if err := t.visitExpressions(node.(IfNode).body, visit); err != nil {
+			return err
+		}
+
+		if node.(IfNode).hasElse {
+			if err := t.visitExpressions(node.(IfNode).elseBody, visit); err != nil {
+				return err
+			}
+		}
+
+	case SwitchNode:
+		if err := visit(node.(SwitchNode).cond); err != nil {
+			return err
+		}
+
+		for _, stmt := range node.(SwitchNode).defaultCase {
+			if err := t.visitExpressions(stmt, visit); err != nil {
+				return err
+			}
+		}
+
+		for _, case_ := range node.(SwitchNode).cases {
+			if err := visit(case_.cond); err != nil {
+				return err
+			}
+
+			if err := t.visitExpressions(case_, visit); err != nil {
+				return err
+			}
+		}
+
+	case WhileNode:
+		if err := visit(node.(WhileNode).cond); err != nil {
+			return err
+		}
+
+		if err := t.visitExpressions(node.(WhileNode).body, visit); err != nil {
+			return err
+		}
+	}
+
 
 	return nil
 }
@@ -207,21 +268,25 @@ func (t TranslationUnit) VerifyFunction(fn FunctionNode) error {
 
 // Verify that all assignments have a proper LHS and RHS
 func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
-	if bin, ok := fn.body.(BinaryNode); ok {
-		if bin.oper == "=" {
-			if err := t.expectLHS(bin.left); err != nil {
-				return err
-			}
-			if err := t.expectRHS(bin.right); err != nil {
-				return err
+	visit := func(node Node) error {
+		stmt, ok := node.(StatementNode)
+
+		if !ok { return nil }
+		if bin, ok := stmt.expr.(BinaryNode); ok {
+			if bin.oper == "=" {
+				if err := t.expectLHS(bin.left); err != nil {
+					return err
+				}
+				if err := t.expectRHS(bin.right); err != nil {
+					return err
+				}
 			}
 		}
 
-	} else if stmt, ok := fn.body.(StatementNode); ok {
-		_ = stmt
+		return nil
 	}
 
-	return nil
+	return t.visitStatements(fn.body, visit)
 }
 
 // TODO: resolve auto variable declarations within function definitions
