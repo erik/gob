@@ -205,7 +205,7 @@ func (p *Parser) parseConstant() (*Node, error) {
 		return nil, err
 	}
 
-	return nil, NewParseError(p.token(), "The impossible happened")
+	return nil, nil
 }
 
 func (p *Parser) parseSubExpression() (*Node, error) {
@@ -403,7 +403,7 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		return &node, nil
 	}
 
-	panic("It's happening")
+	return nil, nil
 }
 
 func (p *Parser) parseFuncDeclaration() (*Node, error) {
@@ -715,12 +715,12 @@ func (p *Parser) parseSwitch() (*Node, error) {
 		}
 
 		if _, ok := p.accept(tkKeyword, "case"); ok {
-			var c caseNode
+			var c CaseNode
 
 			if cond, err := p.parseConstant(); err != nil {
 				return nil, err
 			} else {
-				c = caseNode{cond: *cond}
+				c = CaseNode{cond: *cond}
 			}
 
 			if _, err := p.expectType(tkColon); err != nil {

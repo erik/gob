@@ -13,10 +13,18 @@ func TestExamples(t *testing.T) {
 		if file, err := os.Open(test); err != nil {
 			t.Errorf("failed to open test: %s", err)
 		} else {
+			var unit parse.TranslationUnit
+			var err error
+
 			p := parse.NewParser(test, file)
-			if _, err := p.Parse(); err != nil {
-				t.Errorf("%s failed: %v", test, err)
+			if unit, err = p.Parse(); err != nil {
+				t.Errorf("%s failed to parse: %v", test, err)
 			}
+
+			if err = unit.Verify(); err != nil {
+				t.Errorf("%s failed to verify: %v\n", test, err)
+			}
+
 		}
 	}
 }
