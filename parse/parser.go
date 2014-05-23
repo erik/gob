@@ -44,7 +44,7 @@ func NewParser(name string, input io.Reader) *Parser {
 
 func (p *Parser) Parse() (unit TranslationUnit, err error) {
 	var node *Node = nil
-	unit = TranslationUnit{file: p.lex.name}
+	unit = TranslationUnit{File: p.lex.name}
 
 	// Bail out of lex errors
 	// TODO: this is sort of convoluted logic, refactor
@@ -71,9 +71,9 @@ func (p *Parser) Parse() (unit TranslationUnit, err error) {
 
 		switch (*node).(type) {
 		case FunctionNode:
-			unit.funcs = append(unit.funcs, (*node).(FunctionNode))
+			unit.Funcs = append(unit.Funcs, (*node).(FunctionNode))
 		case ExternVarInitNode, ExternVecInitNode:
-			unit.vars = append(unit.vars, *node)
+			unit.Vars = append(unit.Vars, *node)
 		default:
 			return unit, NewParseError(p.token(),
 				"That's not a top level decl")

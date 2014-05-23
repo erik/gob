@@ -449,18 +449,18 @@ func TestParse(t *testing.T) {
 		t.Errorf("Parse unit: %v", err)
 	}
 
-	if unit.file != "my_file.b" {
-		t.Errorf("Unit name: %s", unit.file)
+	if unit.File != "my_file.b" {
+		t.Errorf("Unit name: %s", unit.File)
 	}
 
-	if len(unit.funcs) != 2 {
-		t.Errorf("Function definitions (got %d): %v", len(unit.funcs),
-			unit.funcs)
+	if len(unit.Funcs) != 2 {
+		t.Errorf("Function definitions (got %d): %v", len(unit.Funcs),
+			unit.Funcs)
 	}
 
-	if len(unit.vars) != 3 {
-		t.Errorf("Var definitions (got %d): %v", len(unit.vars),
-			unit.vars)
+	if len(unit.Vars) != 3 {
+		t.Errorf("Var definitions (got %d): %v", len(unit.Vars),
+			unit.Vars)
 	}
 
 }

@@ -19,21 +19,21 @@ func NewSemanticError(node Node, msg string) error {
 }
 
 type TranslationUnit struct {
-	file  string
-	funcs []FunctionNode
-	vars  []Node
+	File  string
+	Funcs []FunctionNode
+	Vars  []Node
 }
 
 func (t TranslationUnit) String() string {
-	str := fmt.Sprintf("%s:", t.file)
+	str := fmt.Sprintf("%s:", t.File)
 
-	for _, v := range t.vars {
+	for _, v := range t.Vars {
 		str += fmt.Sprintf("%v\n", v)
 	}
 
 	str += "\n\n"
 
-	for _, f := range t.funcs {
+	for _, f := range t.Funcs {
 		str += fmt.Sprintf("%v\n", f)
 	}
 
@@ -46,7 +46,7 @@ func (t TranslationUnit) Verify() error {
 		return err
 	}
 
-	for _, fn := range t.funcs {
+	for _, fn := range t.Funcs {
 
 		if err := t.VerifyFunction(fn); err != nil {
 			return err
@@ -294,7 +294,7 @@ func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
 func (t TranslationUnit) ResolveDuplicates() error {
 	idents := map[string]Node{}
 
-	for _, fn := range t.funcs {
+	for _, fn := range t.Funcs {
 		if _, ok := idents[fn.name]; ok {
 			return NewSemanticError(fn, "Duplicate function name")
 		}
@@ -302,7 +302,7 @@ func (t TranslationUnit) ResolveDuplicates() error {
 		idents[fn.name] = fn
 	}
 
-	for _, v := range t.vars {
+	for _, v := range t.Vars {
 		var name string
 
 		switch v.(type) {
