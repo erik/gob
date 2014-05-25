@@ -347,7 +347,7 @@ switch(1+1) {
 	node, err := parser.parseStatement()
 	if err != nil {
 		t.Errorf("label statement: %v", err)
-	} else if lbl, ok := (*node).(LabelNode); !ok || lbl.name != "label" {
+	} else if lbl, ok := (*node).(LabelNode); !ok || lbl.Name != "label" {
 		t.Errorf("Label incorrect: %v", lbl)
 	}
 

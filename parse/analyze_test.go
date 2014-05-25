@@ -43,10 +43,10 @@ func TestLHS(t *testing.T) {
 	if err := unit.expectLHS(IdentNode{"foo"}); err != nil {
 		t.Errorf("ident node LHS")
 	}
-	if err := unit.expectLHS(ArrayAccessNode{IdentNode{"abc"}, IntegerNode{"2"}}); err != nil {
+	if err := unit.expectLHS(ArrayAccessNode{IdentNode{"abc"}, IntegerNode{2}}); err != nil {
 		t.Errorf("array access lhs")
 	}
-	if err := unit.expectLHS(UnaryNode{"*", IntegerNode{"1"}, false}); err != nil {
+	if err := unit.expectLHS(UnaryNode{"*", IntegerNode{1}, false}); err != nil {
 		t.Errorf("unary node lhs")
 	}
 }

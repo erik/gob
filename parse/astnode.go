@@ -76,13 +76,13 @@ func (b BinaryNode) StringWithPrecedence() string {
 
 // '{' node* '}'
 type BlockNode struct {
-	nodes []Node
+	Nodes []Node
 }
 
 func (b BlockNode) String() string {
 	str := "{\n"
 
-	for _, node := range b.nodes {
+	for _, node := range b.Nodes {
 		str += fmt.Sprintf("\t%v\n", node)
 	}
 
@@ -110,42 +110,42 @@ func (e ExternVarDeclNode) String() string {
 
 // name value ';'
 type ExternVarInitNode struct {
-	name  string
-	value Node
+	Name  string
+	Value Node
 }
 
 func (e ExternVarInitNode) String() string {
-	return fmt.Sprintf("%s %v;", e.name, e.value)
+	return fmt.Sprintf("%s %v;", e.Name, e.Value)
 }
 
 // name '[' size ']' value+ ';'
 type ExternVecInitNode struct {
-	name   string
-	size   string
-	values []Node
+	Name   string
+	Size   int
+	Values []Node
 }
 
 func (e ExternVecInitNode) String() string {
-	vals := make([]string, len(e.values), len(e.values))
+	vals := make([]string, len(e.Values), len(e.Values))
 
-	for i, val := range e.values {
+	for i, val := range e.Values {
 		vals[i] = val.String()
 	}
 
-	return fmt.Sprintf("%s [%s] %s;", e.name, e.size,
+	return fmt.Sprintf("%s [%d] %s;", e.Name, e.Size,
 		strings.Join(vals, ", "))
 }
 
 // name '(' (var (',' var)*) ? ')' block
 type FunctionNode struct {
-	name   string
-	params []string
-	body   Node
+	Name   string
+	Params []string
+	Body   Node
 }
 
 func (f FunctionNode) String() string {
 	return fmt.Sprintf("%s(%s) %s",
-		f.name, strings.Join(f.params, ", "), f.body)
+		f.Name, strings.Join(f.Params, ", "), f.Body)
 }
 
 type FunctionCallNode struct {
@@ -162,9 +162,9 @@ func (f FunctionCallNode) String() string {
 	return fmt.Sprintf("%s(%s)", f.callable, strings.Join(args, ", "))
 }
 
-type GotoNode struct{ label Node }
+type GotoNode struct{ Label string }
 
-func (g GotoNode) String() string { return fmt.Sprintf("goto %v;", g.label) }
+func (g GotoNode) String() string { return fmt.Sprintf("goto %s;", g.Label) }
 
 type IdentNode struct {
 	value string
@@ -173,31 +173,31 @@ type IdentNode struct {
 func (i IdentNode) String() string { return i.value }
 
 type IfNode struct {
-	cond     Node
-	body     Node
-	hasElse  bool
-	elseBody Node
+	Cond     Node
+	Body     Node
+	HasElse  bool
+	ElseBody Node
 }
 
 func (i IfNode) String() string {
 	var elseStr string = ""
 
-	if i.hasElse {
-		elseStr = fmt.Sprintf(" else %v", i.elseBody)
+	if i.HasElse {
+		elseStr = fmt.Sprintf(" else %v", i.ElseBody)
 	}
 
-	return fmt.Sprintf("if(%v) %v%s", i.cond, i.body, elseStr)
+	return fmt.Sprintf("if(%v) %v%s", i.Cond, i.Body, elseStr)
 }
 
 type IntegerNode struct {
-	value string
+	value int
 }
 
-func (i IntegerNode) String() string { return i.value }
+func (i IntegerNode) String() string { return fmt.Sprintf("%d", i.value) }
 
-type LabelNode struct{ name string }
+type LabelNode struct{ Name string }
 
-func (l LabelNode) String() string { return fmt.Sprintf("%s:", l.name) }
+func (l LabelNode) String() string { return fmt.Sprintf("%s:", l.Name) }
 
 type NullNode struct{}
 
@@ -207,15 +207,15 @@ type ParenNode struct{ node Node }
 
 func (p ParenNode) String() string { return "(" + p.node.String() + ")" }
 
-type ReturnNode struct{ node Node }
+type ReturnNode struct{ Node Node }
 
-func (r ReturnNode) String() string { return fmt.Sprintf("return %v;", r.node) }
+func (r ReturnNode) String() string { return fmt.Sprintf("return %v;", r.Node) }
 
 type StatementNode struct {
-	expr Node
+	Expr Node
 }
 
-func (s StatementNode) String() string { return fmt.Sprintf("%v;", s.expr) }
+func (s StatementNode) String() string { return fmt.Sprintf("%v;", s.Expr) }
 
 type StringNode struct {
 	value string
@@ -224,14 +224,14 @@ type StringNode struct {
 func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
 
 type CaseNode struct {
-	cond       Node
-	statements []Node
+	Cond       Node
+	Statements []Node
 }
 
 func (c CaseNode) String() string {
-	str := fmt.Sprintf("\tcase %v:", c.cond)
+	str := fmt.Sprintf("\tcase %v:", c.Cond)
 
-	for _, stmt := range c.statements {
+	for _, stmt := range c.Statements {
 		str += fmt.Sprintf("\n\t\t%v", stmt)
 	}
 
@@ -239,21 +239,21 @@ func (c CaseNode) String() string {
 }
 
 type SwitchNode struct {
-	cond        Node
-	defaultCase []Node
-	cases       []CaseNode
+	Cond        Node
+	DefaultCase []Node
+	Cases       []CaseNode
 }
 
 func (s SwitchNode) String() string {
-	str := fmt.Sprintf("switch(%v) {", s.cond)
+	str := fmt.Sprintf("switch(%v) {", s.Cond)
 
-	for _, cs := range s.cases {
+	for _, cs := range s.Cases {
 		str += "\n" + cs.String()
 	}
 
-	if s.defaultCase != nil {
+	if s.DefaultCase != nil {
 		str += "\ndefault:"
-		for _, stmt := range s.defaultCase {
+		for _, stmt := range s.DefaultCase {
 			str += fmt.Sprintf("\n\t%v", stmt)
 		}
 	}
@@ -287,25 +287,25 @@ func (u UnaryNode) String() string {
 }
 
 type VarDecl struct {
-	name    string
-	vecDecl bool
-	size    string
+	Name    string
+	VecDecl bool
+	Size    int
 }
 
 type VarDeclNode struct {
-	vars []VarDecl
+	Vars []VarDecl
 }
 
 func (v VarDeclNode) String() string {
-	decls := make([]string, 0, len(v.vars))
+	decls := make([]string, 0, len(v.Vars))
 
-	for _, decl := range v.vars {
+	for _, decl := range v.Vars {
 		var str string
 
-		if decl.vecDecl {
-			str = fmt.Sprintf("%s[%s]", decl.name, decl.size)
+		if decl.VecDecl {
+			str = fmt.Sprintf("%s[%d]", decl.Name, decl.Size)
 		} else {
-			str = decl.name
+			str = decl.Name
 		}
 
 		decls = append(decls, str)
@@ -315,10 +315,10 @@ func (v VarDeclNode) String() string {
 }
 
 type WhileNode struct {
-	cond Node
-	body Node
+	Cond Node
+	Body Node
 }
 
 func (w WhileNode) String() string {
-	return fmt.Sprintf("while(%v) %v", w.cond, w.body)
+	return fmt.Sprintf("while(%v) %v", w.Cond, w.Body)
 }

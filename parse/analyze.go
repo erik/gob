@@ -108,44 +108,44 @@ func (t TranslationUnit) visitExpressions(node Node, visit func(Node) error) err
 
 	switch node.(type) {
 	case BlockNode:
-		for _, n := range node.(BlockNode).nodes {
+		for _, n := range node.(BlockNode).Nodes {
 			if err := t.visitExpressions(n, visit); err != nil {
 				return err
 			}
 		}
 	case FunctionNode:
-		if err := t.visitExpressions(node.(FunctionNode).body, visit); err != nil {
+		if err := t.visitExpressions(node.(FunctionNode).Body, visit); err != nil {
 			return err
 		}
 
 	case IfNode:
-		if err := visit(node.(IfNode).cond); err != nil {
+		if err := visit(node.(IfNode).Cond); err != nil {
 			return err
 		}
 
-		if err := t.visitExpressions(node.(IfNode).body, visit); err != nil {
+		if err := t.visitExpressions(node.(IfNode).Body, visit); err != nil {
 			return err
 		}
 
-		if node.(IfNode).hasElse {
-			if err := t.visitExpressions(node.(IfNode).elseBody, visit); err != nil {
+		if node.(IfNode).HasElse {
+			if err := t.visitExpressions(node.(IfNode).ElseBody, visit); err != nil {
 				return err
 			}
 		}
 
 	case SwitchNode:
-		if err := visit(node.(SwitchNode).cond); err != nil {
+		if err := visit(node.(SwitchNode).Cond); err != nil {
 			return err
 		}
 
-		for _, stmt := range node.(SwitchNode).defaultCase {
+		for _, stmt := range node.(SwitchNode).DefaultCase {
 			if err := t.visitExpressions(stmt, visit); err != nil {
 				return err
 			}
 		}
 
-		for _, case_ := range node.(SwitchNode).cases {
-			if err := visit(case_.cond); err != nil {
+		for _, case_ := range node.(SwitchNode).Cases {
+			if err := visit(case_.Cond); err != nil {
 				return err
 			}
 
@@ -155,11 +155,11 @@ func (t TranslationUnit) visitExpressions(node Node, visit func(Node) error) err
 		}
 
 	case WhileNode:
-		if err := visit(node.(WhileNode).cond); err != nil {
+		if err := visit(node.(WhileNode).Cond); err != nil {
 			return err
 		}
 
-		if err := t.visitExpressions(node.(WhileNode).body, visit); err != nil {
+		if err := t.visitExpressions(node.(WhileNode).Body, visit); err != nil {
 			return err
 		}
 	}
@@ -175,7 +175,7 @@ func (t TranslationUnit) visitStatements(node Node, visit func(Node) error) erro
 
 	switch node.(type) {
 	case BlockNode:
-		for _, n := range node.(BlockNode).nodes {
+		for _, n := range node.(BlockNode).Nodes {
 			if err := t.expectStatement(n); err != nil {
 				return err
 			}
@@ -185,11 +185,11 @@ func (t TranslationUnit) visitStatements(node Node, visit func(Node) error) erro
 			}
 		}
 	case FunctionNode:
-		if err := t.expectStatement(node.(FunctionNode).body); err != nil {
+		if err := t.expectStatement(node.(FunctionNode).Body); err != nil {
 			return err
 		}
 
-		if err := t.visitStatements(node.(FunctionNode).body, visit); err != nil {
+		if err := t.visitStatements(node.(FunctionNode).Body, visit); err != nil {
 			return err
 		}
 
@@ -199,12 +199,12 @@ func (t TranslationUnit) visitStatements(node Node, visit func(Node) error) erro
 		}
 
 	case IfNode:
-		if err := t.visitStatements(node.(IfNode).body, visit); err != nil {
+		if err := t.visitStatements(node.(IfNode).Body, visit); err != nil {
 			return err
 		}
 
-		if node.(IfNode).hasElse {
-			if err := t.visitStatements(node.(IfNode).elseBody, visit); err != nil {
+		if node.(IfNode).HasElse {
+			if err := t.visitStatements(node.(IfNode).ElseBody, visit); err != nil {
 				return err
 			}
 		}
@@ -216,20 +216,20 @@ func (t TranslationUnit) visitStatements(node Node, visit func(Node) error) erro
 		}
 	case SwitchNode:
 
-		for _, stmt := range node.(SwitchNode).defaultCase {
+		for _, stmt := range node.(SwitchNode).DefaultCase {
 			if err := t.visitStatements(stmt, visit); err != nil {
 				return err
 			}
 		}
 
-		for _, case_ := range node.(SwitchNode).cases {
+		for _, case_ := range node.(SwitchNode).Cases {
 			if err := t.visitStatements(case_, visit); err != nil {
 				return err
 			}
 		}
 
 	case WhileNode:
-		if err := t.visitStatements(node.(WhileNode).body, visit); err != nil {
+		if err := t.visitStatements(node.(WhileNode).Body, visit); err != nil {
 			return err
 		}
 	}
@@ -239,7 +239,7 @@ func (t TranslationUnit) visitStatements(node Node, visit func(Node) error) erro
 
 func (t TranslationUnit) VerifyFunction(fn FunctionNode) error {
 
-	if err := t.expectNodeType(fn.body, reflect.TypeOf(BlockNode{})); err != nil {
+	if err := t.expectNodeType(fn.Body, reflect.TypeOf(BlockNode{})); err != nil {
 		return err
 	}
 
@@ -258,7 +258,7 @@ func (t TranslationUnit) VerifyFunction(fn FunctionNode) error {
 		return nil
 	}
 
-	if err := t.visitStatements(fn.body, visiter); err != nil {
+	if err := t.visitStatements(fn.Body, visiter); err != nil {
 		return err
 	}
 
@@ -273,7 +273,7 @@ func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
 		if !ok {
 			return nil
 		}
-		if bin, ok := stmt.expr.(BinaryNode); ok {
+		if bin, ok := stmt.Expr.(BinaryNode); ok {
 			if bin.oper == "=" {
 				if err := t.expectLHS(bin.left); err != nil {
 					return err
@@ -287,7 +287,7 @@ func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
 		return nil
 	}
 
-	return t.visitStatements(fn.body, visit)
+	return t.visitStatements(fn.Body, visit)
 }
 
 // TODO: resolve auto variable declarations within function definitions
@@ -295,11 +295,11 @@ func (t TranslationUnit) ResolveDuplicates() error {
 	idents := map[string]Node{}
 
 	for _, fn := range t.Funcs {
-		if _, ok := idents[fn.name]; ok {
+		if _, ok := idents[fn.Name]; ok {
 			return NewSemanticError(fn, "Duplicate function name")
 		}
 
-		idents[fn.name] = fn
+		idents[fn.Name] = fn
 	}
 
 	for _, v := range t.Vars {
@@ -307,9 +307,9 @@ func (t TranslationUnit) ResolveDuplicates() error {
 
 		switch v.(type) {
 		case ExternVecInitNode:
-			name = v.(ExternVecInitNode).name
+			name = v.(ExternVecInitNode).Name
 		case ExternVarInitNode:
-			name = v.(ExternVarInitNode).name
+			name = v.(ExternVarInitNode).Name
 		default:
 			return NewSemanticError(v, "Not variable init")
 		}
@@ -332,10 +332,10 @@ func (t TranslationUnit) ResolveLabels(fn FunctionNode) error {
 	visiter := func(node Node) error {
 		switch node.(type) {
 		case LabelNode:
-			if _, ok := labels[node.(LabelNode).name]; ok {
+			if _, ok := labels[node.(LabelNode).Name]; ok {
 				return NewSemanticError(node, "duplicate label definition")
 			}
-			labels[node.(LabelNode).name] = true
+			labels[node.(LabelNode).Name] = true
 		case GotoNode:
 			gotos = append(gotos, node.(GotoNode))
 		}
@@ -347,7 +347,7 @@ func (t TranslationUnit) ResolveLabels(fn FunctionNode) error {
 	}
 
 	for _, node := range gotos {
-		if _, ok := labels[node.label.(IdentNode).value]; !ok {
+		if _, ok := labels[node.Label]; !ok {
 			return NewSemanticError(node, "unresolved goto")
 		}
 	}

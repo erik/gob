@@ -18,7 +18,7 @@ init: /* initialize to convert an integer */
 
 loop: /* convert an integer */
 
-  switch (C = char(s,++j)){
+  switch (c = char(s,++j)){
 
   case '-':
     if(sign) goto syntax;

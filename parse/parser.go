@@ -3,6 +3,7 @@ package parse
 import (
 	"fmt"
 	"io"
+	"strconv"
 	"strings"
 )
 
@@ -177,7 +178,7 @@ func (p *Parser) parseBlock() (*Node, error) {
 			return nil, err
 		}
 
-		block.nodes = append(block.nodes, *stmt)
+		block.Nodes = append(block.Nodes, *stmt)
 	}
 
 	if _, err := p.expectType(tkCloseBrace); err != nil {
@@ -193,7 +194,12 @@ func (p *Parser) parseConstant() (*Node, error) {
 
 	switch kind, tok, err := p.expectOneOf(tkNumber, tkCharacter, tkString); kind {
 	case tkNumber:
-		node = IntegerNode{tok.value}
+		num, err := strconv.Atoi(tok.value)
+		if err != nil {
+			return nil, NewParseError(p.token(), "invalid integer literal")
+		}
+
+		node = IntegerNode{num}
 		return &node, err
 	case tkCharacter:
 		node = CharacterNode{tok.value}
@@ -348,7 +354,7 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 	}
 
 	if _, ok := p.acceptType(tkOpenBracket); ok {
-		init := ExternVecInitNode{name: ident.value}
+		init := ExternVecInitNode{Name: ident.value}
 
 		size, err := p.expectType(tkNumber)
 		if err != nil {
@@ -358,13 +364,20 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 			return nil, err
 		}
 
-		init.size = size.value
+		// TODO: Assert declared size == actual size
+
+		init.Size, err = strconv.Atoi(size.value)
+
+		if err != nil {
+			return nil, NewParseError(p.token(),
+				"Bad integer literal")
+		}
 
 		for {
 			if constant, err := p.parseConstant(); err != nil {
 				return nil, err
 			} else {
-				init.values = append(init.values, *constant)
+				init.Values = append(init.Values, *constant)
 			}
 
 			if _, ok := p.acceptType(tkComma); !ok {
@@ -378,18 +391,18 @@ func (p *Parser) parseExternalVariableInit() (*Node, error) {
 		}
 		return &node, nil
 	} else {
-		init := ExternVarInitNode{name: ident.value}
+		init := ExternVarInitNode{Name: ident.value}
 
 		constant, err := p.parseConstant()
 		if err != nil {
 			if _, err = p.expectType(tkSemicolon); err == nil {
 				// Empty declarations are zero filled
-				init.value = IntegerNode{"0"}
+				init.Value = IntegerNode{0}
 				var node Node = init
 				return &node, nil
 			}
 		} else {
-			init.value = *constant
+			init.Value = *constant
 		}
 
 		if err != nil {
@@ -415,13 +428,13 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 		return nil, err
 	}
 
-	fnNode := FunctionNode{name: id.value}
+	fnNode := FunctionNode{Name: id.value}
 
 	if _, err = p.expectType(tkOpenParen); err != nil {
 		return nil, err
 	}
 
-	if fnNode.params, err = p.parseVariableList(); err != nil {
+	if fnNode.Params, err = p.parseVariableList(); err != nil {
 		return nil, err
 	}
 
@@ -435,7 +448,7 @@ func (p *Parser) parseFuncDeclaration() (*Node, error) {
 		return nil, err
 	}
 
-	fnNode.body = *stmt
+	fnNode.Body = *stmt
 
 	var node Node = fnNode
 	return &node, err
@@ -488,8 +501,8 @@ func (p *Parser) parseIf() (*Node, error) {
 		elseBody = *els
 	}
 
-	var node Node = IfNode{cond: *cond, body: *trueBody, hasElse: hasElse,
-		elseBody: elseBody}
+	var node Node = IfNode{Cond: *cond, Body: *trueBody, HasElse: hasElse,
+		ElseBody: elseBody}
 	return &node, nil
 
 }
@@ -622,7 +635,7 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 	if _, ok := p.accept(tkKeyword, "return"); ok {
 		var retNode ReturnNode
 		if _, ok := p.acceptType(tkSemicolon); ok {
-			retNode.node = NullNode{}
+			retNode.Node = NullNode{}
 		} else {
 			node, err := p.parseExpression()
 			if err != nil {
@@ -632,7 +645,7 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 			if _, err := p.expectType(tkSemicolon); err != nil {
 				return nil, err
 			}
-			retNode.node = *node
+			retNode.Node = *node
 		}
 
 		var node Node = retNode
@@ -646,7 +659,7 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 			return nil, err
 		}
 
-		var gt Node = GotoNode{label: IdentNode{tok.value}}
+		var gt Node = GotoNode{Label: tok.value}
 
 		if _, err := p.expectType(tkSemicolon); err != nil {
 			return nil, err
@@ -674,7 +687,7 @@ func (p *Parser) parseStatement() (node *Node, err error) {
 		if _, err := p.expectType(tkSemicolon); err != nil {
 			return nil, err
 		}
-		*node = StatementNode{expr: *node}
+		*node = StatementNode{Expr: *node}
 		return node, nil
 	}
 
@@ -696,7 +709,7 @@ func (p *Parser) parseSwitch() (*Node, error) {
 	if cond, err := p.parseExpression(); err != nil {
 		return nil, err
 	} else {
-		switchNode.cond = *cond
+		switchNode.Cond = *cond
 	}
 
 	if _, err := p.expectType(tkCloseParen); err != nil {
@@ -720,7 +733,7 @@ func (p *Parser) parseSwitch() (*Node, error) {
 			if cond, err := p.parseConstant(); err != nil {
 				return nil, err
 			} else {
-				c = CaseNode{cond: *cond}
+				c = CaseNode{Cond: *cond}
 			}
 
 			if _, err := p.expectType(tkColon); err != nil {
@@ -742,18 +755,18 @@ func (p *Parser) parseSwitch() (*Node, error) {
 				if stmt, err := p.parseStatement(); err != nil {
 					return nil, err
 				} else {
-					c.statements = append(c.statements, *stmt)
+					c.Statements = append(c.Statements, *stmt)
 				}
 			}
 
-			switchNode.cases = append(switchNode.cases, c)
+			switchNode.Cases = append(switchNode.Cases, c)
 
 		} else if _, ok := p.accept(tkKeyword, "default"); ok {
 			if _, err := p.expectType(tkColon); err != nil {
 				return nil, err
 			}
 
-			if switchNode.defaultCase != nil {
+			if switchNode.DefaultCase != nil {
 				return nil, NewParseError(p.token(),
 					"Multiple 'default' cases")
 			}
@@ -773,8 +786,8 @@ func (p *Parser) parseSwitch() (*Node, error) {
 				if stmt, err := p.parseStatement(); err != nil {
 					return nil, err
 				} else {
-					switchNode.defaultCase =
-						append(switchNode.defaultCase, *stmt)
+					switchNode.DefaultCase =
+						append(switchNode.DefaultCase, *stmt)
 				}
 			}
 
@@ -833,16 +846,22 @@ func (p *Parser) parseVarDecl() (*Node, error) {
 			if num, err := p.expectType(tkNumber); err != nil {
 				return nil, err
 			} else {
-				varNode.vars = append(varNode.vars,
-					VarDecl{ident.value, true, num.value})
+				size, err := strconv.Atoi(num.value)
+
+				if err != nil {
+					return nil, NewParseError(p.token(), "invalid integer literal")
+				}
+
+				varNode.Vars = append(varNode.Vars,
+					VarDecl{ident.value, true, size})
 			}
 
 			if _, err := p.expectType(tkCloseBracket); err != nil {
 				return nil, err
 			}
 		} else {
-			varNode.vars = append(varNode.vars,
-				VarDecl{ident.value, false, ""})
+			varNode.Vars = append(varNode.Vars,
+				VarDecl{ident.value, false, 0})
 		}
 
 		if _, ok := p.acceptType(tkComma); !ok {
@@ -854,7 +873,7 @@ func (p *Parser) parseVarDecl() (*Node, error) {
 		return nil, err
 	}
 
-	if len(varNode.vars) <= 0 {
+	if len(varNode.Vars) <= 0 {
 		return nil, NewParseError(p.token(),
 			"expected at least 1 variable in auto declaration")
 	}
@@ -907,7 +926,7 @@ func (p *Parser) parseWhile() (*Node, error) {
 		return nil, err
 	}
 
-	var node Node = WhileNode{cond: *cond, body: *body}
+	var node Node = WhileNode{Cond: *cond, Body: *body}
 	return &node, nil
 }
 

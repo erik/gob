@@ -23,7 +23,6 @@ func TestExamples(t *testing.T) {
 			if err = unit.Verify(); err != nil {
 				t.Errorf("%s failed to verify: %v\n", test, err)
 			}
-
 		}
 	}
 }

@@ -12,7 +12,7 @@ var nodefmt = []struct {
 	expr bool
 }{
 	// ArrayAccessNode
-	{ArrayAccessNode{IdentNode{"abc"}, IntegerNode{"2"}}, "abc[2]", true},
+	{ArrayAccessNode{IdentNode{"abc"}, IntegerNode{2}}, "abc[2]", true},
 
 	// BinaryNode
 	{BinaryNode{IdentNode{"a"}, "==", IdentNode{"b"}}, "a == b", true},
@@ -21,23 +21,23 @@ var nodefmt = []struct {
 	{IdentNode{"abcd"}, "abcd", true},
 
 	// IfNode
-	{IfNode{cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
-		body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
+	{IfNode{Cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
+		Body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
 			[]Node{}}},
-		hasElse: false},
+		HasElse: false},
 		"if(a < b) do_this();",
 		false},
-	{IfNode{cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
-		body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
+	{IfNode{Cond: BinaryNode{IdentNode{"a"}, "<", IdentNode{"b"}},
+		Body: StatementNode{FunctionCallNode{IdentNode{"do_this"},
 			[]Node{}}},
-		hasElse: true,
-		elseBody: StatementNode{FunctionCallNode{IdentNode{"do_that"},
+		HasElse: true,
+		ElseBody: StatementNode{FunctionCallNode{IdentNode{"do_that"},
 			[]Node{}}}},
 		"if(a < b) do_this(); else do_that();",
 		false},
 
 	// IntegerNode
-	{IntegerNode{"1234567890"}, "1234567890", true},
+	{IntegerNode{1234567890}, "1234567890", true},
 
 	// CharacterNode
 	{CharacterNode{""}, "''", true},
@@ -50,37 +50,37 @@ var nodefmt = []struct {
 	{FunctionNode{"fn", []string{}, BlockNode{}}, "fn() {\n}", false},
 
 	// FunctionCallNode
-	{FunctionCallNode{IdentNode{"fn"}, []Node{IntegerNode{"1"},
+	{FunctionCallNode{IdentNode{"fn"}, []Node{IntegerNode{1},
 		CharacterNode{"123"}}},
 		"fn(1, '123')", true},
 
 	// BlockNode
-	{BlockNode{[]Node{IntegerNode{"1"}, IntegerNode{"2"},
-		IntegerNode{"3"}}},
+	{BlockNode{[]Node{IntegerNode{1}, IntegerNode{2},
+		IntegerNode{3}}},
 		"{\n\t1\n\t2\n\t3\n}", false},
 
 	// ExternVarInitNode
-	{ExternVarInitNode{"var", IntegerNode{"2"}}, "var 2;", false},
+	{ExternVarInitNode{"var", IntegerNode{2}}, "var 2;", false},
 
 	// ExternVecInitNode
-	{ExternVecInitNode{"var", "2", []Node{IntegerNode{"2"}}}, "var [2] 2;", false},
-	{ExternVecInitNode{"var", "2", []Node{IntegerNode{"2"}, IntegerNode{"3"}}},
+	{ExternVecInitNode{"var", 2, []Node{IntegerNode{2}}}, "var [2] 2;", false},
+	{ExternVecInitNode{"var", 2, []Node{IntegerNode{2}, IntegerNode{3}}},
 		"var [2] 2, 3;", false},
 
 	// ExternVarDeclNode
 	{ExternVarDeclNode{[]string{"a", "b", "c"}}, "extrn a, b, c;", false},
 
 	// StatementNode
-	{StatementNode{IntegerNode{"1"}}, "1;", false},
+	{StatementNode{IntegerNode{1}}, "1;", false},
 
 	// UnaryNode
-	{UnaryNode{"++", IntegerNode{"1"}, false}, "++1", true},
-	{UnaryNode{"++", IntegerNode{"1"}, true}, "1++", true},
+	{UnaryNode{"++", IntegerNode{1}, false}, "++1", true},
+	{UnaryNode{"++", IntegerNode{1}, true}, "1++", true},
 
 	// VarDeclNode
-	{VarDeclNode{[]VarDecl{{"a", false, ""},
-		{"b", true, "12"},
-		{"c", false, ""}}},
+	{VarDeclNode{[]VarDecl{{"a", false, 0},
+		{"b", true, 12},
+		{"c", false, 0}}},
 		"auto a, b[12], c;", false},
 
 	// WhileNode
