@@ -81,7 +81,7 @@ func (c *CEmitter) EmitGlobal(v parse.Node) {
 }
 
 func (c *CEmitter) EmitFunctionProto(fn parse.FunctionNode) {
-	c.EmitPartial(fmt.Sprintf("static B_AUTO %s(", fn.Name))
+	c.EmitPartial(fmt.Sprintf("static B_AUTO %s(", sanitizeIdentifier(fn.Name)))
 
 	for i, param := range fn.Params {
 		c.EmitRaw(fmt.Sprintf("B_AUTO %s", param))
@@ -94,7 +94,7 @@ func (c *CEmitter) EmitFunctionProto(fn parse.FunctionNode) {
 }
 
 func (c *CEmitter) EmitFunction(fn parse.FunctionNode) {
-	c.EmitPartial(fmt.Sprintf("static B_AUTO %s(", fn.Name))
+	c.EmitPartial(fmt.Sprintf("static B_AUTO %s(", sanitizeIdentifier(fn.Name)))
 
 	for i, param := range fn.Params {
 		c.EmitRaw(fmt.Sprintf("B_AUTO %s", param))
@@ -237,11 +237,16 @@ func (c *CEmitter) EmitExpression(expr parse.Node) {
 
 	// TODO: Put a bit more care into this, there are almost certainly
 	//       incompatibilities.
+	//
+	// TODO: Need to sanitize anything that could touch an IdentNode
 	switch expr.(type) {
-	case parse.ArrayAccessNode, parse.BinaryNode, parse.IdentNode,
-		parse.IntegerNode, parse.FunctionCallNode, parse.ParenNode,
+	case parse.ArrayAccessNode, parse.BinaryNode, parse.IntegerNode,
+		parse.FunctionCallNode, parse.ParenNode,
 		parse.TernaryNode, parse.UnaryNode:
 		c.EmitRaw(expr.String())
+
+	case parse.IdentNode:
+		c.EmitRaw(sanitizeIdentifier(expr.String()))
 
 	case parse.CharacterNode:
 		// TODO: special logic goes here
@@ -288,4 +293,9 @@ func (c *CEmitter) Deindent() {
 	if c.indent < 0 {
 		c.indent = 0
 	}
+}
+
+// Return a C version of the given B identifier
+func sanitizeIdentifier(ident string) string {
+	return strings.Replace(ident, ".", "_", -1)
 }
