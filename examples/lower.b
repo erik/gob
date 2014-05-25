@@ -7,5 +7,5 @@ lower(s) {
    auto c,i;
    i = -1 ;
    while( (c=char(s,++i)) != '*e'  )
-   if( c >= 'A' & c <= 'Z' ) lchar(s~i~c-'A'+'a');
+   if( c >= 'A' & c <= 'Z' ) lchar(s, i, c-'A'+'a');
    }
