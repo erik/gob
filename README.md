@@ -3,12 +3,15 @@
 
 Gob is an implementation of the B language, written in Go.
 
-Currently the project is in its infancy and exists only as a
-collection of unit tests. Run `go test ./...` to check for sanity.
+Currently the project is in its infancy and is probably the most brittle
+compiler ever written. Run `go test ./...` to check for sanity.
 
-`go build .` (or `go get github.com/erik/gob`) will give you an
-executable that parses files passed on the command line, and not much
-else.
+`go build .` (or `go get github.com/erik/gob`) will give you an executable that
+parses B files given to it on the command line and generates C output. You
+can't compile this quite yet, because the B standard library wrapper hasn't
+been written yet.
+
+`$ gob examples/snide.b`
 
 I aim to get a fully functional B-language compiler out of this
 project, with compilation to native code through intermediate C, LLVM
@@ -19,19 +22,22 @@ likely the easiest code generator to write.
 I chose Go for this project for two reasons:
 
 1. Ken Thompson had a role in the creation of both Go and B.
-2. I had just finished marathoning Arrested Development, and found the
-name to be too good to pass up.
+2. I had just finished marathoning Arrested Development.
 
 ## Status
 
 * Front end (lex, parse, AST generation)
-  * Lexer mostly working (needs some simple modification to parse all
-    identifiers)
-  * Parser mostly complete, a few syntactic structures not yet handled
+  * Lexer complete
+  * Parser complete
+  * AST definitions complete
+  * Unit tests for parser and lexer are lacking, probably accept some incorrect
+    syntax constructions.
 * Middle end (semantic analysis, optimizations)
-  * Not yet implemented
+  * Semantic analysis is limited, but working.
+  * No optimization performed yet.
 * Back end (code generator)
-  * Not yet implemented
+  * C code generator is almost functional, needs some supporting library code
+    to be entirely working.
 
 ## Links
 
