@@ -7,7 +7,7 @@ snide(errno) {
 
    u = wr.unit ; wr.unit = 1;
 
-   printf("error number %d, %s*n'*,errno,mess[errno]");
+   printf("error number %d, %s*n", errno, mess[errno]);
 
    wr.unit = u;
    }
