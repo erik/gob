@@ -248,9 +248,8 @@ func (c *CEmitter) EmitExpression(expr parse.Node) {
 	case parse.IdentNode:
 		c.EmitRaw(sanitizeIdentifier(expr.String()))
 
-	case parse.CharacterNode:
-		// TODO: special logic goes here
-		c.EmitRaw(expr.String())
+	case parse.CharacterNode, parse.StringNode:
+		c.EmitRaw(escapeString(expr.String()))
 
 	default:
 		fmt.Println(expr)
@@ -298,4 +297,49 @@ func (c *CEmitter) Deindent() {
 // Return a C version of the given B identifier
 func sanitizeIdentifier(ident string) string {
 	return strings.Replace(ident, ".", "_", -1)
+}
+
+// *0	null
+// *e	end-of-file
+// *(	{
+// *)	}
+// *t	tab
+// **	*
+// *'	'
+// *"	"
+// *n	new line
+func escapeString(str string) string {
+	escaped := ""
+
+	for i := 0; i < len(str); i++ {
+		if str[i] == '*' {
+			switch str[i+1] {
+			case '0':
+				escaped += "\\0"
+			case 'e':
+				// EOT
+				escaped += "\\0"
+			case '(':
+				escaped += "{"
+			case ')':
+				escaped += "}"
+			case 't':
+				escaped += "\\t"
+			case '*':
+				escaped += "*"
+			case '\'':
+				escaped += "'"
+			case '"':
+				escaped += "\""
+			case 'n':
+				escaped += "\\n"
+			}
+
+			i += 1
+		} else {
+			escaped += string(str[i])
+		}
+	}
+
+	return escaped
 }

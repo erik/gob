@@ -132,6 +132,10 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 		// cut out leading/trailing "
 		tok.value = tok.value[1 : len(tok.value)-1]
 
+		if _, err := lex.checkEscapes(tok.value); err != nil {
+			return tok.Error(), err
+		}
+
 	case scanner.Ident:
 		// Variable names have one to eight ascii characters,
 		// chosen from A-Z, a-z, ., _, 0-9, and start with a
@@ -196,12 +200,16 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 			case '\'':
 				break endstring
 			default:
-				tok.value = fmt.Sprintf("%s%c", tok.value,
-					char)
+				tok.value += string(char)
 			}
 		}
 
-		if len(tok.value) > 4 {
+		numChars, err := lex.checkEscapes(tok.value)
+		if err != nil {
+			return tok.Error(), err
+		}
+
+		if numChars > 4 {
 			return tok.Error(), NewLexError(lex.scanner.Pos(),
 				fmt.Sprintf("oversized character literal: %s",
 					tok.value))
@@ -269,4 +277,41 @@ func (lex *Lexer) lexToken() (tok Token, err error) {
 	tok.end = lex.scanner.Pos()
 
 	return tok, nil
+}
+
+// *0	null
+// *e	end-of-file
+// *(	{
+// *)	}
+// *t	tab
+// **	*
+// *'	'
+// *"	"
+// *n	new line
+func (lex *Lexer) checkEscapes(str string) (int, error) {
+	escaped := ""
+
+	if str[len(str)-1] == '*' {
+		return -1, NewLexError(lex.scanner.Pos(), "invalid escape sequence")
+	}
+
+	numChars := 0
+
+	for i := 0; i < len(str); i++ {
+		if str[i] == '*' {
+			switch str[i+1] {
+			case '0', 'e', '(', ')', 't', '*', '\'', '"', 'n':
+			default:
+				return -1, NewLexError(lex.scanner.Pos(), fmt.Sprintf("invalid escape: %c", str[i+1]))
+			}
+
+			i += 1
+		} else {
+			escaped += string(str[i])
+		}
+
+		numChars += 1
+	}
+
+	return numChars, nil
 }

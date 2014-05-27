@@ -99,6 +99,26 @@ other_ident.123__
 	}
 }
 
+func TestEscapeSequences(t *testing.T) {
+	in := strings.NewReader(` '*(*)*t*n' '*bad' 'bad*(*('`)
+	lex := NewLexer("file", in)
+
+	tok, err := lex.NextToken()
+	if err != nil || tok.kind != tkCharacter || tok.value != "*(*)*t*n" {
+		t.Errorf("escapes: %v %v", tok, err)
+	}
+
+	tok, err = lex.NextToken()
+	if err == nil {
+		t.Errorf("bad escape: %v", tok)
+	}
+
+	tok, err = lex.NextToken()
+	if err == nil {
+		t.Errorf("bad escape: %v", tok)
+	}
+}
+
 // Test operator lexing
 func TestLexOp(t *testing.T) {
 	lex := NewLexer("", strings.NewReader(`> = >= + ++ ---`))

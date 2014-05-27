@@ -192,7 +192,13 @@ func (p *Parser) parseBlock() (*Node, error) {
 func (p *Parser) parseConstant() (*Node, error) {
 	var node Node
 
-	switch kind, tok, err := p.expectOneOf(tkNumber, tkCharacter, tkString); kind {
+	kind, tok, err := p.expectOneOf(tkNumber, tkCharacter, tkString)
+
+	if err != nil {
+		return nil, err
+	}
+
+	switch kind {
 	case tkNumber:
 		num, err := strconv.Atoi(tok.value)
 		if err != nil {
