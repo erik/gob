@@ -35,43 +35,43 @@ func IsStatement(n Node) bool {
 }
 
 type ArrayAccessNode struct {
-	array Node
-	index Node
+	Array Node
+	Index Node
 }
 
 func (a ArrayAccessNode) String() string {
-	return fmt.Sprintf("%s[%s]", a.array, a.index)
+	return fmt.Sprintf("%s[%s]", a.Array, a.Index)
 }
 
 type BinaryNode struct {
-	left  Node
-	oper  string
-	right Node
+	Left  Node
+	Oper  string
+	Right Node
 }
 
 func (b BinaryNode) String() string {
 	return fmt.Sprintf("%v %s %v",
-		b.left, b.oper, b.right)
+		b.Left, b.Oper, b.Right)
 }
 
 // Use parens to make precedence more apparent
 func (b BinaryNode) StringWithPrecedence() string {
 	var left, right string
 
-	if bin, ok := b.left.(BinaryNode); ok {
+	if bin, ok := b.Left.(BinaryNode); ok {
 		left = bin.StringWithPrecedence()
 	} else {
-		left = b.left.String()
+		left = b.Left.String()
 	}
 
-	if bin, ok := b.right.(BinaryNode); ok {
+	if bin, ok := b.Right.(BinaryNode); ok {
 		right = bin.StringWithPrecedence()
 	} else {
-		right = b.right.String()
+		right = b.Right.String()
 	}
 
 	return fmt.Sprintf("(%v %s %v)",
-		left, b.oper, right)
+		left, b.Oper, right)
 }
 
 // '{' node* '}'
@@ -149,17 +149,17 @@ func (f FunctionNode) String() string {
 }
 
 type FunctionCallNode struct {
-	callable Node
-	args     []Node
+	Callable Node
+	Args     []Node
 }
 
 func (f FunctionCallNode) String() string {
-	args := make([]string, len(f.args), len(f.args))
-	for i, arg := range f.args {
+	args := make([]string, len(f.Args), len(f.Args))
+	for i, arg := range f.Args {
 		args[i] = arg.String()
 	}
 
-	return fmt.Sprintf("%s(%s)", f.callable, strings.Join(args, ", "))
+	return fmt.Sprintf("%s(%s)", f.Callable, strings.Join(args, ", "))
 }
 
 type GotoNode struct{ Label string }
@@ -167,10 +167,10 @@ type GotoNode struct{ Label string }
 func (g GotoNode) String() string { return fmt.Sprintf("goto %s;", g.Label) }
 
 type IdentNode struct {
-	value string
+	Value string
 }
 
-func (i IdentNode) String() string { return i.value }
+func (i IdentNode) String() string { return i.Value }
 
 type IfNode struct {
 	Cond     Node
@@ -190,10 +190,10 @@ func (i IfNode) String() string {
 }
 
 type IntegerNode struct {
-	value int
+	Value int
 }
 
-func (i IntegerNode) String() string { return fmt.Sprintf("%d", i.value) }
+func (i IntegerNode) String() string { return fmt.Sprintf("%d", i.Value) }
 
 type LabelNode struct{ Name string }
 
@@ -203,9 +203,9 @@ type NullNode struct{}
 
 func (n NullNode) String() string { return "" }
 
-type ParenNode struct{ node Node }
+type ParenNode struct{ Node Node }
 
-func (p ParenNode) String() string { return "(" + p.node.String() + ")" }
+func (p ParenNode) String() string { return "(" + p.Node.String() + ")" }
 
 type ReturnNode struct{ Node Node }
 
@@ -218,10 +218,10 @@ type StatementNode struct {
 func (s StatementNode) String() string { return fmt.Sprintf("%v;", s.Expr) }
 
 type StringNode struct {
-	value string
+	Value string
 }
 
-func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.value) }
+func (s StringNode) String() string { return fmt.Sprintf("\"%s\"", s.Value) }
 
 type CaseNode struct {
 	Cond       Node
@@ -264,26 +264,26 @@ func (s SwitchNode) String() string {
 // Yes, I know "ternary" is no more descriptive than binary op,
 // but there's only one.
 type TernaryNode struct {
-	cond      Node
-	trueBody  Node
-	falseBody Node
+	Cond      Node
+	TrueBody  Node
+	FalseBody Node
 }
 
 func (t TernaryNode) String() string {
-	return fmt.Sprintf("(%v ? %v : %v)", t.cond, t.trueBody, t.falseBody)
+	return fmt.Sprintf("(%v ? %v : %v)", t.Cond, t.TrueBody, t.FalseBody)
 }
 
 type UnaryNode struct {
-	oper    string
-	node    Node
-	postfix bool
+	Oper    string
+	Node    Node
+	Postfix bool
 }
 
 func (u UnaryNode) String() string {
-	if u.postfix {
-		return fmt.Sprintf("%v%s", u.node, u.oper)
+	if u.Postfix {
+		return fmt.Sprintf("%v%s", u.Node, u.Oper)
 	}
-	return fmt.Sprintf("%s%v", u.oper, u.node)
+	return fmt.Sprintf("%s%v", u.Oper, u.Node)
 }
 
 type VarDecl struct {

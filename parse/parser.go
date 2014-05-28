@@ -221,14 +221,14 @@ func (p *Parser) parseConstant() (*Node, error) {
 }
 
 func (p *Parser) parseSubExpression() (*Node, error) {
-	unNode := UnaryNode{oper: ""}
+	unNode := UnaryNode{Oper: ""}
 
 	// Unary prefix operator
 	if tok, ok := p.acceptType(tkOperator); ok {
 		// *, &, -, !, ++, --, and ~.
 		switch tok.value {
 		case "*", "&", "-", "!", "++", "--", "~":
-			unNode = UnaryNode{oper: tok.value, postfix: false}
+			unNode = UnaryNode{Oper: tok.value, Postfix: false}
 		default:
 			return nil, NewParseError(p.token(), "invalid unary op")
 		}
@@ -240,16 +240,16 @@ func (p *Parser) parseSubExpression() (*Node, error) {
 	}
 
 	// TODO: this logic is ugly.
-	if unNode.oper != "" {
-		unNode.node = *expr
+	if unNode.Oper != "" {
+		unNode.Node = *expr
 		*expr = unNode
 	}
 
 	if p.token().kind == tkOperator {
 		switch p.token().value {
 		case "++", "--": // Unary postfix operator
-			unNode = UnaryNode{oper: p.token().value,
-				node: *expr, postfix: true}
+			unNode = UnaryNode{Oper: p.token().value,
+				Node: *expr, Postfix: true}
 			*expr = unNode
 
 			p.nextToken()
@@ -277,21 +277,21 @@ func (p *Parser) parseExpression() (*Node, error) {
 		// TODO: currently ignores LTR, RTL binding
 		if rbin, ok := (*rhs).(BinaryNode); ok {
 			lproc, _ := OperatorPrecedence(tok.value)
-			rproc, _ := OperatorPrecedence(rbin.oper)
+			rproc, _ := OperatorPrecedence(rbin.Oper)
 
 			if lproc > rproc {
-				left := BinaryNode{left: *node, oper: tok.value,
-					right: rbin.left}
-				bin = BinaryNode{left: left, oper: rbin.oper,
-					right: rbin.right}
+				left := BinaryNode{Left: *node, Oper: tok.value,
+					Right: rbin.Left}
+				bin = BinaryNode{Left: left, Oper: rbin.Oper,
+					Right: rbin.Right}
 			} else {
-				bin = BinaryNode{left: *node, oper: tok.value,
-					right: rbin}
+				bin = BinaryNode{Left: *node, Oper: tok.value,
+					Right: rbin}
 			}
 
 		} else {
-			bin = BinaryNode{left: *node,
-				oper: tok.value, right: *rhs}
+			bin = BinaryNode{Left: *node,
+				Oper: tok.value, Right: *rhs}
 		}
 
 		*node = bin
@@ -299,12 +299,12 @@ func (p *Parser) parseExpression() (*Node, error) {
 
 	// Ternary operator
 	if _, ok := p.acceptType(tkTernary); ok {
-		ter := TernaryNode{cond: *node}
+		ter := TernaryNode{Cond: *node}
 
 		if body, err := p.parseExpression(); err != nil {
 			return nil, err
 		} else {
-			ter.trueBody = *body
+			ter.TrueBody = *body
 		}
 
 		if _, err := p.expectType(tkColon); err != nil {
@@ -314,7 +314,7 @@ func (p *Parser) parseExpression() (*Node, error) {
 		if body, err := p.parseExpression(); err != nil {
 			return nil, err
 		} else {
-			ter.falseBody = *body
+			ter.FalseBody = *body
 		}
 
 		*node = ter
@@ -552,7 +552,7 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 			return nil, err
 		}
 
-		*node = ArrayAccessNode{array: array, index: *index}
+		*node = ArrayAccessNode{Array: array, Index: *index}
 		return node, nil
 	}
 
@@ -578,7 +578,7 @@ func (p *Parser) parsePrimary() (node *Node, err error) {
 		if _, err := p.expectType(tkCloseParen); err != nil {
 			return nil, err
 		}
-		*node = FunctionCallNode{callable: *node, args: args}
+		*node = FunctionCallNode{Callable: *node, Args: args}
 		return node, nil
 	}
 

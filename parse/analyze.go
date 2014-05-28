@@ -69,7 +69,7 @@ func (t TranslationUnit) expectLHS(node Node) error {
 	case ArrayAccessNode, IdentNode:
 		return nil
 	case UnaryNode:
-		if node.(UnaryNode).oper == "*" {
+		if node.(UnaryNode).Oper == "*" {
 			return nil
 		}
 	}
@@ -274,11 +274,11 @@ func (t TranslationUnit) VerifyAssignments(fn FunctionNode) error {
 			return nil
 		}
 		if bin, ok := stmt.Expr.(BinaryNode); ok {
-			if bin.oper == "=" {
-				if err := t.expectLHS(bin.left); err != nil {
+			if bin.Oper == "=" {
+				if err := t.expectLHS(bin.Left); err != nil {
 					return err
 				}
-				if err := t.expectRHS(bin.right); err != nil {
+				if err := t.expectRHS(bin.Right); err != nil {
 					return err
 				}
 			}

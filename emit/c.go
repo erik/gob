@@ -240,10 +240,58 @@ func (c *CEmitter) EmitExpression(expr parse.Node) {
 	//
 	// TODO: Need to sanitize anything that could touch an IdentNode
 	switch expr.(type) {
-	case parse.ArrayAccessNode, parse.BinaryNode, parse.IntegerNode,
-		parse.FunctionCallNode, parse.ParenNode,
-		parse.TernaryNode, parse.UnaryNode:
+	case parse.ArrayAccessNode:
+		arr := expr.(parse.ArrayAccessNode)
+		c.EmitExpression(arr.Array)
+		c.EmitRaw("[")
+		c.EmitExpression(arr.Index)
+		c.EmitRaw("]")
+
+	case parse.BinaryNode:
+		bin := expr.(parse.BinaryNode)
+		c.EmitExpression(bin.Left)
+		c.EmitRaw(" " + bin.Oper + " ")
+		c.EmitExpression(bin.Right)
+
+	case parse.IntegerNode:
 		c.EmitRaw(expr.String())
+
+	case parse.FunctionCallNode:
+		fun := expr.(parse.FunctionCallNode)
+		c.EmitExpression(fun.Callable)
+		c.EmitRaw("(")
+		for i, arg := range fun.Args {
+			c.EmitExpression(arg)
+
+			if i != len(fun.Args)-1 {
+				c.EmitRaw(", ")
+			}
+		}
+
+		c.EmitRaw(")")
+
+	case parse.ParenNode:
+		c.EmitRaw("(")
+		c.EmitExpression(expr.(parse.ParenNode).Node)
+		c.EmitRaw(")")
+
+	case parse.TernaryNode:
+		ter := expr.(parse.TernaryNode)
+		c.EmitExpression(ter.Cond)
+		c.EmitRaw(" ? ")
+		c.EmitExpression(ter.TrueBody)
+		c.EmitRaw(" : ")
+		c.EmitExpression(ter.FalseBody)
+
+	case parse.UnaryNode:
+		un := expr.(parse.UnaryNode)
+		if un.Postfix {
+			c.EmitExpression(un.Node)
+			c.EmitRaw(un.Oper)
+		} else {
+			c.EmitRaw(un.Oper)
+			c.EmitExpression(un.Node)
+		}
 
 	case parse.IdentNode:
 		c.EmitRaw(sanitizeIdentifier(expr.String()))
