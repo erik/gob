@@ -6,6 +6,7 @@ import (
 	"github.com/erik/gob/emit"
 	"github.com/erik/gob/parse"
 	"os"
+	"path"
 )
 
 const GOB_VERSION = "0.0.0"
@@ -15,7 +16,7 @@ var (
 		"Show version info", "")
 	parseOnly = opt.Flag([]string{"-p", "--parse-only"}, []string{},
 		"Don't output anything, just parse", "")
-	outFile = opt.Flag([]string{"-o"}, []string{}, "Specify output file", "")
+	outFile = opt.String([]string{"-o"}, "", "Name of output file")
 )
 
 func main() {
@@ -57,7 +58,20 @@ func main() {
 			continue
 		}
 
+		var outName string = *outFile
+		
+		if outName == "" {
+			outName = path.Base(name) + ".c"
+		}
+
+		if file, err = os.Create(outName); err != nil {
+			fmt.Println(err)
+			os.Exit(1)
+		}
+
 		var emit emit.CEmitter
-		fmt.Println(emit.Emit(unit))
+		emit.Emit(file, unit)
+
+		file.Close()
 	}
 }

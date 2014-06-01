@@ -1,19 +1,20 @@
 package emit
 
 import (
-	"bytes"
 	"fmt"
 	"github.com/erik/gob/parse"
 	"strings"
+	"io"
+	"bufio"
 )
 
 type CEmitter struct {
-	buf    bytes.Buffer
+	writer *bufio.Writer
 	indent int
 }
 
-func (c CEmitter) Emit(unit parse.TranslationUnit) string {
-	c.buf.Reset()
+func (c CEmitter) Emit(writer io.Writer, unit parse.TranslationUnit) error {
+	c.writer = bufio.NewWriter(writer)
 	c.indent = 0
 
 	c.EmitHeaders(unit)
@@ -36,7 +37,9 @@ func (c CEmitter) Emit(unit parse.TranslationUnit) string {
 		c.EmitFunction(f)
 	}
 
-	return c.buf.String()
+	c.writer.Flush()
+
+	return nil
 }
 
 func (c *CEmitter) EmitHeaders(unit parse.TranslationUnit) {
@@ -306,18 +309,18 @@ func (c *CEmitter) EmitExpression(expr parse.Node) {
 }
 
 func (c *CEmitter) EmitRaw(text string) {
-	c.buf.WriteString(text)
+	c.writer.WriteString(text)
 }
 
 func (c *CEmitter) EmitPartial(line string) {
-	c.buf.WriteString(strings.Repeat("\t", c.indent))
-	c.buf.WriteString(line)
+	c.writer.WriteString(strings.Repeat("\t", c.indent))
+	c.writer.WriteString(line)
 }
 
 func (c *CEmitter) EmitLine(line string) {
-	c.buf.WriteString(strings.Repeat("\t", c.indent))
-	c.buf.WriteString(line)
-	c.buf.WriteString("\n")
+	c.writer.WriteString(strings.Repeat("\t", c.indent))
+	c.writer.WriteString(line)
+	c.writer.WriteString("\n")
 }
 
 func (c *CEmitter) StartBlock() {

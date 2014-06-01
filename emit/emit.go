@@ -2,8 +2,9 @@ package emit
 
 import (
 	"github.com/erik/gob/parse"
+	"io"
 )
 
 type Emitter interface {
-	Emit(parse.TranslationUnit) string
+	Emit(io.Writer, parse.TranslationUnit) error
 }
