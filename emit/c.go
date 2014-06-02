@@ -1,11 +1,11 @@
 package emit
 
 import (
+	"bufio"
 	"fmt"
 	"github.com/erik/gob/parse"
-	"strings"
 	"io"
-	"bufio"
+	"strings"
 )
 
 type CEmitter struct {

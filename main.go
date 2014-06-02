@@ -59,7 +59,7 @@ func main() {
 		}
 
 		var outName string = *outFile
-		
+
 		if outName == "" {
 			outName = path.Base(name) + ".c"
 		}
